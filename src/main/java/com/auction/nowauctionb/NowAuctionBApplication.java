@@ -11,7 +11,6 @@ public class NowAuctionBApplication {
         SpringApplication.run(NowAuctionBApplication.class, args);
 
 
-
     }
 
 }
