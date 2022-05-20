@@ -28,6 +28,10 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
+
+    implementation("com.auth0:java-jwt:3.16.0") //  oauth0
+    implementation group: 'commons-codec', name: 'commons-codec', version: '1.15'
 }
 
 tasks.named('test') {

@@ -3,31 +3,36 @@ package com.auction.nowauctionb.configpack;
 
 // 보안에 관한 설정파일, 로그인시 필터부분을 전부 관할
 
-import org.springframework.core.annotation.Order;
+import lombok.RequiredArgsConstructor;
+
+
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.web.filter.CorsFilter;
 
-@Order(1)
+@Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor // 요즘 autowierd 대신쓰기위해 나온것
 public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
 
-
+    private final CorsFilter corsConfig;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
 
         // session은 안하는걸로 , csrf 끄기
         http
                 // cors config 클래스로 설정을 줄꺼여서 그냥 이대로 주석처리
                 //.cors().disable()
                 .csrf().disable()
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .addFilter(corsConfig) // @CrossOrigin (인증 x), 시큐리티 필터 등록 인증
                 // 유저 패스워드 값으로 로그인을 진행 안함 , 폼로그인 x
                 .formLogin().disable()
                 // 기본적인 http 로그인방식도 사용하지않는다.
@@ -41,9 +46,6 @@ public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
 
                 // 위쪽 세개 주소가 아니라면 나머지 주소는 모두 혀용
                 .anyRequest().permitAll();
-
-
-
 
                 // 나중에 아래 코드는 꼭 체인 삭제 해줘야함 테스트용도임
                 //.antMatchers("/test/**")

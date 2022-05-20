@@ -36,14 +36,6 @@ public class LoginCotroller1 {
         return credentialResponse;
     }
 
-    // 테스트코드 반드시 삭제 요망
-    @GetMapping(value = "test/try-login-google")
-    public String testLoginTryGoogle(@RequestParam int i){
-
-        System.out.println(i);
-
-        return "{success : true}";
-    }
 
 
 
