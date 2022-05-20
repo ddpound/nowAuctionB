@@ -24,6 +24,8 @@ public class LoginCotroller1 {
 
     // get방식으로 토큰값과 유저 이메일을 가져와야함
     // 헤더에 Authentication header이여야함 bearer 넣기
+
+    // 이메일을 체크후 자동 회원가입 및 자동 로그인 해야함
     @GetMapping(value = "try-login-google")
     public String loginTryGoogle(@RequestBody String credentialResponse){
 
