@@ -3,11 +3,17 @@ package com.auction.nowauctionb.configpack;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.springframework.beans.factory.annotation.Value;
 
-import java.time.Instant;
+
 
 public class JWTUtil {
-    private static final Algorithm ALGORITHM = Algorithm.HMAC256("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");
+
+
+    @Value("${googlelogin.secretkey}")
+    private static String secretkey;
+
+    private static final Algorithm ALGORITHM = Algorithm.HMAC256(secretkey);
 
     private static final long AUTH_TIME = 2; // 테스트를 위해 유효기간을 2초만 둔다
 
