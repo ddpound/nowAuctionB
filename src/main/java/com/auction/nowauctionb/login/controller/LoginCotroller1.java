@@ -1,6 +1,7 @@
 package com.auction.nowauctionb.login.controller;
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -10,8 +11,6 @@ import java.util.HashMap;
 
 @RestController
 public class LoginCotroller1 {
-
-
 
     // 기본 로그인도 사용할수 있으니 일단 기본로그인은 남겨두기
     @GetMapping(value = "try-login")
@@ -27,13 +26,12 @@ public class LoginCotroller1 {
 
     // 이메일을 체크후 자동 회원가입 및 자동 로그인 해야함
     @GetMapping(value = "try-login-google")
-    public String loginTryGoogle(@RequestBody String credentialResponse){
+    public String loginTryGoogle(){
 
-        System.out.println(credentialResponse);
+        System.out.println("컨트롤러 검증");
 
 
-
-        return credentialResponse;
+        return "스프링 부트 리턴";
     }
 
 

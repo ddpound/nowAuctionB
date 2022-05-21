@@ -3,27 +3,38 @@ package com.auction.nowauctionb.configpack;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+
+import lombok.Data;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 
-
+@Data
+@Component
 public class JWTUtil {
 
-
+    // @Value 는 정적 변수로는 담지 못함
     @Value("${googlelogin.secretkey}")
-    private static String secretkey;
+    private String secretkey;
 
-    private static final Algorithm ALGORITHM = Algorithm.HMAC256(secretkey);
+    private Algorithm ALGORITHM;
 
     private static final long AUTH_TIME = 2; // 테스트를 위해 유효기간을 2초만 둔다
 
     private static final long REFRESH_TIME = 60*60*24*7;
 
-    // 원래는 구분용도로 claim을 넣어줘도 되지만 일단 테스트용이니깐 넘어갑니다!
+    // null 값 방지를 위해서 @PostConstruct 를 이용해 값을 강제로 주입했습니다
+    @PostConstruct
+    public void init(){
+        ALGORITHM = Algorithm.HMAC256(secretkey);
+    }
 
 
-    // 확인, 입증
-    public static DecodedJWT verify(String token){
+
+    public DecodedJWT verify(String token){
+
         try{
             // 만약에 인증에 성공한다면
             DecodedJWT verify = JWT.require(ALGORITHM).build().verify(token);
@@ -37,4 +48,9 @@ public class JWTUtil {
             return decode;
         }
     }
+
+
+    // 확인, 입증
+
+
 }
