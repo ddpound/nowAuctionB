@@ -3,6 +3,7 @@ package com.auction.nowauctionb.configpack;
 
 // 보안에 관한 설정파일, 로그인시 필터부분을 전부 관할
 
+import com.auction.nowauctionb.filter.JWTCheckFilter;
 import lombok.RequiredArgsConstructor;
 
 
@@ -37,6 +38,9 @@ public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin().disable()
                 // 기본적인 http 로그인방식도 사용하지않는다.
                 .httpBasic().disable()
+                // 위의 필터를 껐기 때문에 아래 필터를 재추가
+                // WebSecurityConfigurerAdapter 가 들고있음
+                .addFilter(new JWTCheckFilter(authenticationManager())) // AuthenticationManager를 던져줘야함
                 .authorizeRequests()
                 // 로그인시에는 user로 시작하는 모든 url접근은 가능
                 //.antMatchers("/user/**").authenticated()

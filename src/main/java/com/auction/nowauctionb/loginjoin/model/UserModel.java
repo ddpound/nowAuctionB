@@ -1,4 +1,4 @@
-package com.auction.nowauctionb.join.model;
+package com.auction.nowauctionb.loginjoin.model;
 
 
 import lombok.*;
@@ -27,9 +27,17 @@ public class UserModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;
 
+    // 이메일이 담길예정, 중복 불가
+    private String email;
+
+    // 구글등의 닉네임이 담길 예정
     private String username;
 
+    // 토큰값을 넣을까 고민중
     private String password;
+
+    // 어디 로그인api를 사용했는지도 구분해놔야함
+    private String oauthname;
 
     private String roles; // USER, ADMIN, Seller
 
@@ -40,6 +48,13 @@ public class UserModel {
         }
         return new ArrayList<>();
     }
+
+    //최초 로그인 날짜와
+
+
+    //가장 마지막으로 로그인한 날짜를 정해주자
+
+    // 그리고 만료
 
 
 }
