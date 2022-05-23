@@ -2,12 +2,14 @@ package com.auction.nowauctionb.configpack.auth;
 
 
 import com.auction.nowauctionb.loginjoin.model.UserModel;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+@Data
 public class PrincipalDetails implements UserDetails {
 
     // 현재 User 값은 아래 UserModel이 들고있기 때문에 가져옴
@@ -34,6 +36,9 @@ public class PrincipalDetails implements UserDetails {
         return userModel.getPassword();
     }
     // 사용할 username 즉 아이디는 이메일로 하려 합니다.
+
+    // 여기서 중요함 나는 이메일을 반환하도록함
+    // 이메일이 시큐리티 계정 기준으로는 유저네임이 됨
     @Override
     public String getUsername() {
         return userModel.getEmail();

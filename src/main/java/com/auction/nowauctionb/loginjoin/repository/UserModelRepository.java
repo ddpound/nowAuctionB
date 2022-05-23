@@ -1,6 +1,7 @@
 package com.auction.nowauctionb.loginjoin.repository;
 
 import com.auction.nowauctionb.loginjoin.model.UserModel;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

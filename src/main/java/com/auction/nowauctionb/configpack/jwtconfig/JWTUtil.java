@@ -39,6 +39,8 @@ public class JWTUtil {
     public String makeAuthToken(UserModel user){
         return JWT.create()
                 .withSubject(user.getUsername())
+                .withIssuer("nowAuction")
+                .withClaim("userRole",user.getRoleList())
                 .withClaim("exp", Instant.now().getEpochSecond()+AUTH_TIME)
                 .sign(Algorithm.HMAC256(myKey));
 

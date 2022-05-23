@@ -3,6 +3,7 @@ package com.auction.nowauctionb.configpack.auth;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 //현재 폼로그인을꺼놔서
 // login요청시 제대로 작동을 안한다
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class PrincipalDetailsService implements UserDetailsService {
@@ -32,9 +34,9 @@ public class PrincipalDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         // 제대로 작동하는지 체크
-        System.out.println("PrincipalDetailsServiceOnlin");
-
+        log.info("PrincipalDetailsServiceOnline");
         UserModel userModel = userModelRepository.findByEmail(username);
+
 
         if(userModel != null){
 
@@ -43,9 +45,12 @@ public class PrincipalDetailsService implements UserDetailsService {
             // 시큐리티 세션 ( Authentication( UserDetails) ) 이렇게 또 담긴다
             // 원래 대로라면
             // 그리고 세션이 만들어지면서 로그인이 완료됩니다.
+            log.info("login success");
             return new PrincipalDetails(userModel);
         }
 
+
+        // null이라는 뜻은 해당유저가 아니라는뜻
         return null;
     }
 }

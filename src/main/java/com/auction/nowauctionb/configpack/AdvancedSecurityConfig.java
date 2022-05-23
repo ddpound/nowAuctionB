@@ -3,16 +3,21 @@ package com.auction.nowauctionb.configpack;
 
 // 보안에 관한 설정파일, 로그인시 필터부분을 전부 관할
 
-import com.auction.nowauctionb.filter.JWTCheckFilter;
+import com.auction.nowauctionb.configpack.jwtconfig.JWTUtil;
+import com.auction.nowauctionb.filter.JWTLoginFilter;
+import com.auction.nowauctionb.loginjoin.service.TokenJoinService;
 import lombok.RequiredArgsConstructor;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.filter.CorsFilter;
 
 @Configuration
@@ -22,6 +27,10 @@ import org.springframework.web.filter.CorsFilter;
 public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CorsFilter corsConfig;
+
+    @Autowired
+    private TokenJoinService tokenJoinService;
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -40,7 +49,8 @@ public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic().disable()
                 // 위의 필터를 껐기 때문에 아래 필터를 재추가
                 // WebSecurityConfigurerAdapter 가 들고있음
-                .addFilter(new JWTCheckFilter(authenticationManager())) // AuthenticationManager를 던져줘야함
+                // 뉴가 아니라 아래처럼 해줘야함, JWT는 IOC에서 객체 관리를 하지않기에
+                .addFilter(new JWTLoginFilter(authenticationManager(),new JWTUtil(), tokenJoinService)) // AuthenticationManager를 던져줘야함
                 .authorizeRequests()
                 // 로그인시에는 user로 시작하는 모든 url접근은 가능
                 //.antMatchers("/user/**").authenticated()

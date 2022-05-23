@@ -46,8 +46,9 @@ public class LoginCotroller1 {
     // get방식으로 토큰값과 유저 이메일을 가져와야함
     // 헤더에 Authentication header이여야함 bearer 넣기
 
+    // 항상 POST 로 시도해야한다고함, 필터에서 한번 걸러서 엔드포인트인 컨트롤러로 올듯
     // 이메일을 체크후 자동 회원가입 및 자동 로그인 해야함
-    @GetMapping(value = "try-login-google")
+    @PostMapping (value = "login/token/google")
     public String loginTryGoogle(ServletRequest servletRequest) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
@@ -82,19 +83,6 @@ public class LoginCotroller1 {
             // 이미 있다면 토큰이 만료돼었는지 확인
             System.out.println("이미 있는 계정입니다. 토큰 체크하겠습니다...");
 
-        }else{
-            // 없으면 회원가입 진행
-            System.out.println("없는 계정입니다. 자동회원가입 및 로그인, 토큰 전달을 진행합니다.");
-            UserModel userModel1 = new UserModel();
-            userModel1.setPassword(bCryptPasswordEncoder.encode("12345")); // 비밀번호는 암호화
-            userModel1.setRoles("ROLE_USER"); // 항상 기본이 되는 USER
-            userModel1.setUsername(testMapper.get("name"));
-            userModel1.setEmail(testMapper.get("email"));
-            userModel1.setOauthname("Google");
-            userModelRepository.save(userModel1);
-
-            System.out.println("회원가입이 완료되었습니다. 토큰이 발행되었습니다.");
-            return jwtUtil.makeAuthToken(userModel1);
         }
         // 새로은 토큰 반환해주기
         return "fail make token....";
@@ -107,6 +95,11 @@ public class LoginCotroller1 {
         userModel.setRoles("ROLE_USER");
 
         return "회원가입 이 완료 되었습니다.";
+    }
+
+    @GetMapping(value = "/user/test1")
+    public String testAuthoriContriller(){
+        return "유저 권한";
     }
 
 
