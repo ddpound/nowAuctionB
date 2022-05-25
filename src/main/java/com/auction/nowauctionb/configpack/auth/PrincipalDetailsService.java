@@ -45,6 +45,7 @@ public class PrincipalDetailsService implements UserDetailsService {
             // 시큐리티 세션 ( Authentication( UserDetails) ) 이렇게 또 담긴다
             // 원래 대로라면
             // 그리고 세션이 만들어지면서 로그인이 완료됩니다.
+            log.info("principaldetail password : "+userModel.getPassword());
             log.info("login success");
             return new PrincipalDetails(userModel);
         }

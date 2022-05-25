@@ -32,7 +32,7 @@ public class FilterConfig {
     @Bean
     public FilterRegistrationBean<TestFilter2> secondTest(){
         FilterRegistrationBean<TestFilter2> bean = new FilterRegistrationBean<>(new TestFilter2());
-        bean.addUrlPatterns("/*");
+        bean.addUrlPatterns("/*"); // 이처럼 특정 url도 설정가능
         bean.setOrder(1); // 전에 했던 오더 코드 가장 먼저해라 1이니까
 
         return bean;

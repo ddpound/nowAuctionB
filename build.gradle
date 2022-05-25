@@ -30,7 +30,10 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
 
 
-    implementation("com.auth0:java-jwt:3.16.0") //  oauth0
+    // 토큰값 검증받기 위함, 구글 토큰을 검증받기 위해 받은 라이브러리 의존성
+    implementation group: 'com.google.api-client', name: 'google-api-client', version: '1.33.1'
+
+    implementation("com.auth0:java-jwt:3.16.0") //  oauth0, jwt 토큰 사용하기 위함
     implementation group: 'commons-codec', name: 'commons-codec', version: '1.15'
 }
 

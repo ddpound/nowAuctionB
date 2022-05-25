@@ -8,7 +8,11 @@ import com.auction.nowauctionb.loginjoin.service.TokenJoinService;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,10 +24,14 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Map;
 
 
@@ -46,13 +54,19 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
     // 회원가입을 위한 서비스
     private TokenJoinService tokenJoinService;
 
+    // 암호화
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
 
     public JWTLoginFilter(AuthenticationManager authenticationManager,
-                          JWTUtil jwtUtil, TokenJoinService tokenJoinService) {
+                          JWTUtil jwtUtil, TokenJoinService tokenJoinService,
+                          BCryptPasswordEncoder bCryptPasswordEncoder) {
         super(authenticationManager);
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.tokenJoinService = tokenJoinService;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+
 
         // login/token 으로 접속하는 모든 링크들을 와일드카드로 이용해서 모두 받아온다
         setFilterProcessesUrl("/login/token/**");
@@ -64,11 +78,11 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
     // 로그인 시도시 PrincipalDetailsService가 호출
     // loadUserByUsername 호출
     // 마지막으로 principalDetails를 세션에 담아주고 JWT 토큰을 만들어서 반환해준다
+    @SneakyThrows
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
         ObjectMapper objectMapper = new ObjectMapper();
-        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 
 
         String headerAuth = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -76,18 +90,29 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
         // 즉 토큰 요청일때
         if(headerAuth != null){
 
+            //DecodedJWT testVerfiy = jwtUtil.verify(headerAuth.substring("Bearer ".length()));
             //d디코드 시작
-            DecodedJWT verify = jwtUtil.onlyDecode(headerAuth.substring("Bearer ".length()));
+            DecodedJWT decodedJWT = jwtUtil.onlyDecode(headerAuth.substring("Bearer ".length()));
             Base64 base64 = new Base64();
-            String decodedString = new String(base64.decode(verify
+            String decodedString = new String(base64.decode(decodedJWT
                     .getPayload()
                     .getBytes(StandardCharsets.UTF_8)));
 
+            // 헤더 읽어보기, 아님 verify signature 읽어보기
+            //String decodedString2 = ;
 
+            String testResult = jwtUtil.testVerify(headerAuth.substring("Bearer ".length()));
 
             try {
                 Map<String, String> googleTokenMapper = objectMapper.readValue(decodedString, new TypeReference<>(){
                 });
+
+
+                //Map<String, String> googleTokenMapper2 = objectMapper.readValue(decodedString2, new TypeReference<>(){
+               // });
+
+                //log.info(googleTokenMapper2.get("kid")); // 이게 공개키
+                //DecodedJWT testVerfiy = jwtUtil.verify(headerAuth.substring("Bearer ".length()), googleTokenMapper2.get("kid"));
 
                 // 구글에서 날라온 토큰인지도 확인해야함
 
@@ -105,9 +130,13 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
                     tokenJoinService.joinGoogleUser(joinUserModel); // save 임
                     log.info("save new user email: "+ googleTokenMapper.get("email") );
+
+
+
                     userModel = joinUserModel; // 회원가입 시키고 다시 초기화시켜준다 값을 찾을수 있도록
 
                     // 여기다가 회원 후 로그인 토큰 발급해줘야함
+
                 }else{
                     log.info("already account. token check");
                 }
@@ -118,6 +147,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
                 // 이미 있는 계정이니 스프링시큐리티 로그인과
                 // 원래 토큰값을 체크와 생성을 해보겠다 라는 뜻
 
+                log.info("userModel password : "+userModel.getPassword());
 
                 // 프론트 앤드 .env에도 비밀번호 저장해두고 사용할 예정
                 UsernamePasswordAuthenticationToken authenticationToken =
@@ -134,15 +164,30 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
                 System.out.println("1=====================================1");
                 System.out.println(principalDetails.getUsername());
 
+                log.info("principalDetails : " +principalDetails.getUserModel().getUsername());
                 // 리턴을 올바르게 해주면 세션에 저장됨
                 return authentication;
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            // 로그인 신호에 담긴 request를 받아온다
+            return null;
         }
 
 
-        // 로그인 신호에 담긴 request를 받아온다
+
         return null;
+    }
+
+
+    // attemptAuthentication 실행후 성공시
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authResult) throws IOException, ServletException {
+
+        log.info("successfulAuthentication");
+        super.successfulAuthentication(request, response, chain, authResult);
     }
 }

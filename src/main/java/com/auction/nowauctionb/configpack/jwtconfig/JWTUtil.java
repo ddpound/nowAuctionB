@@ -7,14 +7,31 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 
 
 
+import com.auth0.jwt.interfaces.RSAKeyProvider;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
-import java.time.Instant;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 
-@Component
+import java.time.Instant;
+import java.util.Collections;
+
+@Log4j2
 public class JWTUtil {
+
+    @Value("${googlelogin.googleClientId}")
+    private String googleClientId;
+
 
     @Value("${googlelogin.googlekey}")
     private String googlekey;
@@ -22,6 +39,15 @@ public class JWTUtil {
     // @Value 는 정적 변수로는 담지 못함
     @Value("${myToken.myKey}")
     private String myKey;
+
+    // expinent 가 jwt 에서 e
+    // modulus는 verity signatyre 의 n 이라고함
+    private PublicKey publicKey(String modulus, String exponent){
+
+        return null;
+    }
+
+
 
 
     private static final long AUTH_TIME = 20*60; // 테스트를 위해 유효기간을 2초만 둔다
@@ -74,27 +100,100 @@ public class JWTUtil {
     }
 
 
+    public String testVerify(String token) throws GeneralSecurityException, IOException {
+        if (googlekey ==null){
+            log.info("googlekey null");
+        }
+
+        GoogleIdTokenVerifier googleIdTokenVerifier =
+                new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                        .setAudience(Collections.singletonList(googleClientId))
+                        .setIssuer("https://accounts.google.com")
+                        .build();
+
+        GoogleIdToken googleIdToken = googleIdTokenVerifier.verify(token);
+
+        // 값이 나오면 인증 성공
+        // 설명이 조금 부실하긴함 인증 하지만 암호화 검증이 제대로 이루어졌는지에 대한 궁금증
+        if(googleIdToken != null){
+            GoogleIdToken.Payload payload = googleIdToken.getPayload();
+
+            log.info("testGoogle verify");
+            log.info(payload.getSubject());
+            log.info(payload.getEmail());
+            String name = (String) payload.get("name");
+            log.info(name);
+
+            return payload.getEmail();
+
+        }else{
+            log.info("not verify google token");
+            return null;
+        }
+
+
+    }
+
 
     // 구글의 알고리즘은 RS256이다
     // 공개 키 아이디를 가져와야함
-    public DecodedJWT verify(String token){
+    public DecodedJWT googleVerify(String token) throws GeneralSecurityException, IOException {
+        if (googlekey ==null){
+            log.info("googlekey null");
+        }
+
+        GoogleIdTokenVerifier googleIdTokenVerifier =
+                new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                        .setAudience(Collections.singletonList(googleClientId))
+                        .setIssuer("https://accounts.google.com")
+                        .build();
+
+        GoogleIdToken googleIdToken = googleIdTokenVerifier.verify(token);
+
+        if(googleIdToken != null){
+            GoogleIdToken.Payload payload = googleIdToken.getPayload();
+
+            log.info(payload.getSubject());
+            log.info(payload.getEmail());
+            String email = (String) payload.get("name");
+            log.info(email);
+
+        }else{
+            log.info("not verify google token");
+            return null;
+        }
 
 
 
-        System.out.println("yml 가져온 변수값 확인 : " + googlekey);
+        try {
+            DecodedJWT decodedJWT = JWT.decode(token);
+
+        }catch (Exception e){
+
+        }
+
+        //System.out.println("yml 가져온 변수값 확인 : " + googlekey);
+
+
         // 현재 구글 토큰은 비대칭키 알고리즘 RS256을 사용
         //Algorithm algorithm = Algorithm.RSA256(new RsAPu,googlekey);
 
         // 임시방편 알고리즘
         Algorithm algorithm = Algorithm.HMAC256(googlekey);
 
+
+
+        // private key는 null이여도 괜찮다고 함, verify하는데는 전혀 지장이없음
+        // rsa256 , rs256 알고리즘 따로 구현 해야할듯
+        Algorithm algorithm1 = Algorithm.RSA256(null , null);
+
         System.out.println("altorithm null 값 확인 :" + algorithm);
+
 
         try{
             // 만약에 인증에 성공한다면
-
-
             DecodedJWT verify = JWT.require(algorithm).build().verify(token);
+            log.info("========success token verify========");
             return verify;
         }catch (Exception e){
             e.printStackTrace();

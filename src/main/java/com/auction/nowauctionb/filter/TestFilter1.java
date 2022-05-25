@@ -31,7 +31,10 @@ public class TestFilter1 implements Filter {
     JWTUtil jwtUtil;
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
+
+
     public TestFilter1(JWTUtil jwtUtil) {
+
         this.jwtUtil = jwtUtil;
     }
 

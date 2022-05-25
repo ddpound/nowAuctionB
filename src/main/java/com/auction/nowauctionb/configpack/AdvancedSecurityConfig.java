@@ -31,6 +31,19 @@ public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private TokenJoinService tokenJoinService;
 
+    @Bean
+    public JWTUtil jwtUtil(){
+        return new JWTUtil();
+    }
+
+
+    // IOC 에서 로직 짤때 사용
+//
+//    @Bean
+//    public BCryptPasswordEncoder passwordEncoder(){
+//        return new BCryptPasswordEncoder();
+//    }
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -50,7 +63,7 @@ public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
                 // 위의 필터를 껐기 때문에 아래 필터를 재추가
                 // WebSecurityConfigurerAdapter 가 들고있음
                 // 뉴가 아니라 아래처럼 해줘야함, JWT는 IOC에서 객체 관리를 하지않기에
-                .addFilter(new JWTLoginFilter(authenticationManager(),new JWTUtil(), tokenJoinService)) // AuthenticationManager를 던져줘야함
+                .addFilter(new JWTLoginFilter(authenticationManager(),jwtUtil(), tokenJoinService, new BCryptPasswordEncoder())) // AuthenticationManager를 던져줘야함
                 .authorizeRequests()
                 // 로그인시에는 user로 시작하는 모든 url접근은 가능
                 //.antMatchers("/user/**").authenticated()

@@ -18,7 +18,10 @@ public class TokenJoinService {
     @Transactional
     public int joinGoogleUser(UserModel userModel){
 
+        //userModel.setPassword(userModel.getPassword());
+
         // 받아온 비밀번호를 다시 앞 id를 붙여줘야함
+
         // 새로운 시큐리티 버전으로 오면서 이렇게 변경됨
         userModel.setPassword("{bcrypt}"+userModel.getPassword());
 
