@@ -4,6 +4,7 @@ package com.auction.nowauctionb.configpack;
 // 보안에 관한 설정파일, 로그인시 필터부분을 전부 관할
 
 import com.auction.nowauctionb.configpack.jwtconfig.JWTUtil;
+import com.auction.nowauctionb.configpack.jwtconfig.LoginFilterJWTUtil;
 import com.auction.nowauctionb.filter.JWTLoginFilter;
 import com.auction.nowauctionb.loginjoin.service.TokenJoinService;
 import lombok.RequiredArgsConstructor;
@@ -28,12 +29,17 @@ public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CorsFilter corsConfig;
 
-    @Autowired
     private TokenJoinService tokenJoinService;
 
     @Bean
-    public JWTUtil jwtUtil(){
-        return new JWTUtil();
+    public LoginFilterJWTUtil loginFilterJWTUtil(){
+        return new LoginFilterJWTUtil();
+    }
+
+
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+        return new BCryptPasswordEncoder();
     }
 
 
@@ -63,7 +69,7 @@ public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
                 // 위의 필터를 껐기 때문에 아래 필터를 재추가
                 // WebSecurityConfigurerAdapter 가 들고있음
                 // 뉴가 아니라 아래처럼 해줘야함, JWT는 IOC에서 객체 관리를 하지않기에
-                .addFilter(new JWTLoginFilter(authenticationManager(),jwtUtil(), tokenJoinService, new BCryptPasswordEncoder())) // AuthenticationManager를 던져줘야함
+                .addFilter(new JWTLoginFilter(authenticationManager(), loginFilterJWTUtil())) // AuthenticationManager를 던져줘야함
                 .authorizeRequests()
                 // 로그인시에는 user로 시작하는 모든 url접근은 가능
                 //.antMatchers("/user/**").authenticated()

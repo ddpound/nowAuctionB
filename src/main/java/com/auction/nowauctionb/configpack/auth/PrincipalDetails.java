@@ -3,13 +3,16 @@ package com.auction.nowauctionb.configpack.auth;
 
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-@Data
+@Setter
+@Getter
 public class PrincipalDetails implements UserDetails {
 
     // 현재 User 값은 아래 UserModel이 들고있기 때문에 가져옴
@@ -23,12 +26,12 @@ public class PrincipalDetails implements UserDetails {
     // String type 이여서 아래 new GrantedAuthority 생성자를 이용하면 String 반환이 가능하다
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-        userModel.getRoleList().forEach(s->{
-            collection.add(()->s);
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        userModel.getRoleList().forEach(r->{
+            authorities.add(()->r);
         });
 
-        return collection;
+        return authorities;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class PrincipalDetails implements UserDetails {
     // 이메일이 시큐리티 계정 기준으로는 유저네임이 됨
     @Override
     public String getUsername() {
-        return userModel.getEmail();
+        return userModel.getUsername();
     }
     // 만료 유무를 따짐
     @Override

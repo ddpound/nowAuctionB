@@ -27,10 +27,11 @@ public class UserModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int userId;
 
-    // 이메일이 담길예정, 중복 불가
-    private String email;
-
     // 구글등의 닉네임이 담길 예정
+    private String nickname;
+
+    // 이메일이 담길예정, 중복 불가
+    // username이 이메일
     private String username;
 
     // 토큰값을 넣을까 고민중
