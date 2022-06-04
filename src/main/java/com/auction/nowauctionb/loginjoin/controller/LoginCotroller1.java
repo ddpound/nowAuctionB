@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -47,13 +48,11 @@ public class LoginCotroller1 {
 
     // 항상 POST 로 시도해야한다고함, 필터에서 한번 걸러서 엔드포인트인 컨트롤러로 올듯
     // 이메일을 체크후 자동 회원가입 및 자동 로그인 해야함
-    @PostMapping (value = "login/token/google")
+    @GetMapping (value = "login/token/google")
     public String loginTryGoogle(ServletRequest servletRequest) {
 
         // 처음 로그인할때 exchang 메소드를 이용해서 아이디 검증후 없다면
         // join문 실행해줘도 될듯
-
-
 
 
         return "good";
@@ -73,6 +72,8 @@ public class LoginCotroller1 {
     public String testAuthoriContriller(){
         return "유저 권한";
     }
+
+
 
 
 }

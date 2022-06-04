@@ -9,11 +9,13 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -68,11 +70,13 @@ public class TokenJoinService {
     @Transactional
     public int googleTokenJoingetHeader(HttpServletRequest request){
 
-        if (dbsecretkey != null){
-            log.info("tokenService key " + dbsecretkey);
+        if (dbsecretkey == null){
+            log.info("tokenService key is null");
         }
 
         String headerAuth = request.getHeader(HttpHeaders.AUTHORIZATION);
+        System.out.println();
+        System.out.println(headerAuth);
 
         // 즉 토큰 요청일때
         if(headerAuth != null){
@@ -111,8 +115,6 @@ public class TokenJoinService {
 
 
         }
-
-
 
         return 1;
     }

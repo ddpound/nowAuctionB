@@ -136,9 +136,13 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         //토큰 생성
         String makeMyToken = loginFilterJWTUtil.makeAuthToken(principalDetails.getUserModel());
+        String makeRefleshToken = loginFilterJWTUtil.makeRfreshToken(principalDetails.getUserModel());
 
+        log.info("make Token : "+makeMyToken);
         //헤더에 담아 전송, 프론트에 전달
         response.addHeader("Authorization", "Bearer "+ makeMyToken);
+        response.addHeader("RefreshToken","Bearer "+ makeRefleshToken);
+
         //super.successfulAuthentication(request, response, chain, authResult);
     }
 }
