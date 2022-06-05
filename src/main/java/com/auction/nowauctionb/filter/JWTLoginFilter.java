@@ -96,7 +96,6 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
                 Authentication authentication =
                         authenticationManager.authenticate(authenticationToken);
 
-                System.out.println("1=====================================1");
                 PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
                 System.out.println(principalDetails.getUsername());
@@ -144,5 +143,8 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
         response.addHeader("RefreshToken","Bearer "+ makeRefleshToken);
 
         //super.successfulAuthentication(request, response, chain, authResult);
+
+        // 이게 있어야 필터가 다음값으로 넘어가줌
+        chain.doFilter(request,response);
     }
 }

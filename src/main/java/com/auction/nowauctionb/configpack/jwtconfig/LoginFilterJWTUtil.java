@@ -105,15 +105,19 @@ public class LoginFilterJWTUtil {
 
 
     public DecodedJWT myTokenVerify(String token){
-
+        log.info("token check verify " + token);
         try {
             DecodedJWT verify = JWT.require(Algorithm.HMAC256(myKey)).build().verify(token);
+            log.info("success token verify");
             return verify;
         }catch (Exception e){
             e.printStackTrace();
-        }
+            DecodedJWT decodeJWT = JWT.decode(token);
 
-        return null;
+            log.info("fail verify : " + decodeJWT);
+            return null;
+
+        }
     }
 
 
