@@ -12,7 +12,15 @@ public class UserController1 {
     public String getUserName(){
 
 
+
         return "success user Info!!!";
     }
+
+
+    @GetMapping(value = "/user/test1")
+    public String testAuthoriContriller(){
+        return "유저 권한";
+    }
+
 
 }

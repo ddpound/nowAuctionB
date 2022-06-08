@@ -59,10 +59,10 @@ public class JWTCheckFilter extends BasicAuthenticationFilter {
     @SneakyThrows
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        // 응답 두번방지를 위해서 그냥 넘겨버림
+        // 응답 두번방지를 위해서 ,안그럼 그냥 넘겨버림
         //super.doFilterInternal(request, response, chain);
 
-        log.info("인증이나 권한이 필요한 주소요청이 됨.");
+        log.info("JWTCheckFilter has been activated.");
 
         String jwtHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         //System.out.println("테스트 헤더값체크 : " + jwtHeader);

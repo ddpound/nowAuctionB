@@ -5,6 +5,7 @@ package com.auction.nowauctionb.configpack;
 
 import com.auction.nowauctionb.configpack.jwtconfig.JWTUtil;
 import com.auction.nowauctionb.configpack.jwtconfig.LoginFilterJWTUtil;
+import com.auction.nowauctionb.configpack.jwtconfig.repository.JwtSuperintendRepository;
 import com.auction.nowauctionb.filter.JWTCheckFilter;
 import com.auction.nowauctionb.filter.JWTLoginFilter;
 import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
@@ -32,6 +33,8 @@ public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
     private final CorsFilter corsConfig;
 
     private final UserModelRepository userModelRepository;
+
+    private final JwtSuperintendRepository jwtSuperintendRepository;
 
     private TokenJoinService tokenJoinService;
 
@@ -74,7 +77,10 @@ public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
                 // 위의 필터를 껐기 때문에 아래 필터를 재추가
                 // WebSecurityConfigurerAdapter 가 들고있음
                 // 뉴가 아니라 아래처럼 해줘야함, JWT는 IOC에서 객체 관리를 하지않기에
-                .addFilter(new JWTLoginFilter(authenticationManager(), loginFilterJWTUtil())) // AuthenticationManager를 던져줘야함
+                .addFilter(new JWTLoginFilter(authenticationManager(),
+                        loginFilterJWTUtil(),
+                        jwtSuperintendRepository,
+                        userModelRepository)) // AuthenticationManager를 던져줘야함
                 //
                 .addFilter(new JWTCheckFilter(authenticationManager(),loginFilterJWTUtil(), userModelRepository))
                 .authorizeRequests()

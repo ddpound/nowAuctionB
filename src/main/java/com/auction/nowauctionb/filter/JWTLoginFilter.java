@@ -1,6 +1,9 @@
 package com.auction.nowauctionb.filter;
 
 import com.auction.nowauctionb.configpack.jwtconfig.LoginFilterJWTUtil;
+import com.auction.nowauctionb.configpack.jwtconfig.model.JwtSuperintendModel;
+import com.auction.nowauctionb.configpack.jwtconfig.repository.JwtSuperintendRepository;
+import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
 import  com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.configpack.jwtconfig.JWTUtil;
@@ -9,12 +12,14 @@ import com.auction.nowauctionb.loginjoin.service.TokenJoinService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.annotations.Filter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -22,6 +27,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -47,6 +53,11 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
     // 스프링 IOC 에서 관리할수 없으니 생성자에서 받아오자
     private final LoginFilterJWTUtil loginFilterJWTUtil;
 
+
+    private final UserModelRepository userModelRepository;
+
+    private final JwtSuperintendRepository jwtSuperintendRepository;
+
     // 회원가입을 위한 서비스
    //private TokenJoinService tokenJoinService;
 
@@ -54,9 +65,14 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
     //private BCryptPasswordEncoder bCryptPasswordEncoder;
 
 
-    public JWTLoginFilter(AuthenticationManager authenticationManager, LoginFilterJWTUtil jwtUtil) {
+    public JWTLoginFilter(AuthenticationManager authenticationManager,
+                          LoginFilterJWTUtil jwtUtil,
+                          JwtSuperintendRepository jwtSuperintendRepository,
+                          UserModelRepository userModelRepository) {
         this.authenticationManager = authenticationManager;
         this.loginFilterJWTUtil = jwtUtil;
+        this.jwtSuperintendRepository = jwtSuperintendRepository;
+        this.userModelRepository = userModelRepository;
         // login/token 으로 접속하는 모든 링크들을 와일드카드로 이용해서 모두 받아온다
         setFilterProcessesUrl("/login/token/**");
     }
@@ -71,9 +87,8 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
 
-
+        log.info("JWTLoginFilter has been activated.");
         String headerAuth = request.getHeader(HttpHeaders.AUTHORIZATION);
-
         // 즉 토큰 요청일때
         if(headerAuth != null){
 
@@ -93,19 +108,27 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
                 // 이게 loadUserByUsername()이 올바르게 작동하고 리턴값이 있다면
                 // 올바르게 로그인했다는 뜻
                 log.info("logiun try....");
+                // 여기 담겨야지 로그인 성공
                 Authentication authentication =
                         authenticationManager.authenticate(authenticationToken);
 
                 PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
-                System.out.println(principalDetails.getUsername());
 
                 log.info("principalDetails : " +principalDetails.getUserModel().getUsername());
 
                 // 리턴을 올바르게 해주면 세션에 저장됨
                 log.info("login success");
+
+
                 return authentication;
-            } catch (IOException e) {
+
+
+                // 보통 에러는 UserDeatilsService returned null 즉 원하는 유저 값이없어서
+                // UserDeatailsService가 null값을 반환하도록 만들어놔서 발생하는 에러
+
+            }
+            catch (IOException e) {
                 e.printStackTrace();
             }
             // 로그인 신호에 담긴 request를 받아온다
@@ -119,6 +142,7 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
 
     // attemptAuthentication 실행후 성공시
+    @Transactional
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
@@ -133,15 +157,26 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
         // authResult가 Principal을 가지고있음
         PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
 
-        //토큰 생성
+        //토큰 생성, DB에 이미 회원이 있다는 뜻
         String makeMyToken = loginFilterJWTUtil.makeAuthToken(principalDetails.getUserModel());
         String makeRefleshToken = loginFilterJWTUtil.makeRfreshToken(principalDetails.getUserModel());
 
-        log.info("make Token : "+makeMyToken);
+        //log.info("make Token : "+makeMyToken);
         //헤더에 담아 전송, 프론트에 전달
         response.addHeader("Authorization", "Bearer "+ makeMyToken);
         response.addHeader("RefreshToken","Bearer "+ makeRefleshToken);
 
+        UserModel userModel =  userModelRepository.findByUsername(principalDetails.getUserModel().getUsername());
+
+        JwtSuperintendModel jwtSuperintendModel = JwtSuperintendModel.builder()
+                .user(userModel)
+                .accessToken(makeMyToken)
+                .refreshToken(makeRefleshToken)
+                .build();
+
+        jwtSuperintendRepository.save(jwtSuperintendModel);
+
+        // 이건 해주면안댐
         //super.successfulAuthentication(request, response, chain, authResult);
 
         // 이게 있어야 필터가 다음값으로 넘어가줌

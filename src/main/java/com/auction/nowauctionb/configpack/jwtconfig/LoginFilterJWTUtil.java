@@ -5,6 +5,7 @@ package com.auction.nowauctionb.configpack.jwtconfig;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -66,14 +67,14 @@ public class LoginFilterJWTUtil {
         if(googleIdToken != null){
             GoogleIdToken.Payload payload = googleIdToken.getPayload();
 
-            log.info("Verification success");
+            log.info("GoogleToken Verification success");
             log.info(payload.getSubject());
             log.info(payload.getEmail());
             String name = (String) payload.get("name");
             log.info(name);
             return payload;
         }else{
-            log.info("Verification failed");
+            log.info("GoogleToken Verification failed");
             return null;
         }
     }
@@ -105,16 +106,25 @@ public class LoginFilterJWTUtil {
 
 
     public DecodedJWT myTokenVerify(String token){
-        log.info("token check verify " + token);
+        log.info("my token check verify " + token);
         try {
             DecodedJWT verify = JWT.require(Algorithm.HMAC256(myKey)).build().verify(token);
-            log.info("success token verify");
+            log.info("success myToken verify");
             return verify;
-        }catch (Exception e){
-            e.printStackTrace();
+        }catch (TokenExpiredException e){
+            log.info("The myToken has expired"); // 토큰 유효시간이 지남
+
             DecodedJWT decodeJWT = JWT.decode(token);
 
-            log.info("fail verify : " + decodeJWT);
+            // 재발급이 필요, 리프레시 토큰이 있나 체크해야함
+            return null;
+        }
+
+        catch (Exception e){
+            //e.printStackTrace();
+            DecodedJWT decodeJWT = JWT.decode(token);
+
+            log.info("myToken fail verify : " + decodeJWT);
             return null;
 
         }
