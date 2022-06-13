@@ -23,6 +23,7 @@ import org.springframework.security.authentication.InternalAuthenticationService
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
@@ -35,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 
 // 원래는 /login 을 POST 요청을 통해 username과 password를 담아서 받으면
@@ -96,6 +98,9 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
                 Payload googlepayload = loginFilterJWTUtil.googleVerify(headerAuth.substring("Bearer ".length()));
 
+                // 구글 토큰 구조 체크를 위해
+                //System.out.println(loginFilterJWTUtil.simpleDecode(headerAuth.substring("Bearer ".length())).getClaims());
+
                 // 어쳐피 아래 로그인에서 해줌
                 //UserModel userModel = tokenJoinService.findByUsername(googlepayload.getEmail());
 
@@ -112,10 +117,14 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
                 Authentication authentication =
                         authenticationManager.authenticate(authenticationToken);
 
-                PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+                SecurityContextHolder.getContext().setAuthentication(authentication);
 
 
-                log.info("principalDetails : " +principalDetails.getUserModel().getUsername());
+                // 담기는지 확인한것
+                //PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+
+
+                //log.info("principalDetails : " + principalDetails.getUserModel().getUsername());
 
                 // 리턴을 올바르게 해주면 세션에 저장됨
                 log.info("login success");
@@ -142,7 +151,6 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
 
     // attemptAuthentication 실행후 성공시
-    @Transactional
     @Override
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
@@ -151,30 +159,8 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // 로그인 시도가 성공했고 인증이 완료 되었다는 뜻입니다.
         log.info("successfulAuthentication");
-        log.info("Validation completed, login successful.");
+        //log.info("Validation completed, login successful.");
 
-
-        // authResult가 Principal을 가지고있음
-        PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
-
-        //토큰 생성, DB에 이미 회원이 있다는 뜻
-        String makeMyToken = loginFilterJWTUtil.makeAuthToken(principalDetails.getUserModel());
-        String makeRefleshToken = loginFilterJWTUtil.makeRfreshToken(principalDetails.getUserModel());
-
-        //log.info("make Token : "+makeMyToken);
-        //헤더에 담아 전송, 프론트에 전달
-        response.addHeader("Authorization", "Bearer "+ makeMyToken);
-        response.addHeader("RefreshToken","Bearer "+ makeRefleshToken);
-
-        UserModel userModel =  userModelRepository.findByUsername(principalDetails.getUserModel().getUsername());
-
-        JwtSuperintendModel jwtSuperintendModel = JwtSuperintendModel.builder()
-                .user(userModel)
-                .accessToken(makeMyToken)
-                .refreshToken(makeRefleshToken)
-                .build();
-
-        jwtSuperintendRepository.save(jwtSuperintendModel);
 
         // 이건 해주면안댐
         //super.successfulAuthentication(request, response, chain, authResult);
@@ -182,4 +168,6 @@ public class JWTLoginFilter extends UsernamePasswordAuthenticationFilter {
         // 이게 있어야 필터가 다음값으로 넘어가줌
         chain.doFilter(request,response);
     }
+
+
 }

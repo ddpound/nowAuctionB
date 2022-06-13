@@ -1,19 +1,27 @@
 package com.auction.nowauctionb.userAssociated.controller;
 
 
+import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
+import com.auction.nowauctionb.loginjoin.model.UserModel;
+import com.auction.nowauctionb.userAssociated.frontmodel.UserModelFront;
+import com.auction.nowauctionb.userAssociated.service.UserService1;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@RequiredArgsConstructor
 @RestController
 public class UserController1 {
 
+    private final UserService1 userService1;
 
     @GetMapping(value = "user/info")
-    public String getUserName(){
+    public UserModelFront getUserName(Authentication authentication){
 
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
-
-        return "success user Info!!!";
+        return userService1.findUserNameFrontUserModel(principalDetails.getUsername());
     }
 
 

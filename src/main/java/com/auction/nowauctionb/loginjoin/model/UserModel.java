@@ -42,6 +42,9 @@ public class UserModel {
 
     private String roles; // USER, ADMIN, Seller
 
+    // 썸네일 사진
+    private String picture;
+
     public List<String> getRoleList(){
         if(this.roles.length() > 0){
             // , 로 스플릿 해서 배열로 리턴해준다

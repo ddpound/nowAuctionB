@@ -16,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.Collections;
@@ -49,10 +50,10 @@ public class LoginFilterJWTUtil {
     private final long REFRESH_TIME = 60*60*24*7;
 
     public GoogleIdToken.Payload googleVerify(String token) throws GeneralSecurityException, IOException {
-        if (googlekey !=null){
-            log.info("googlekey null" + dbsecretkey);
-            log.info("googlekey null" + googlekey);
-        }
+//        if (googlekey !=null){
+//            log.info("dbsecretKey null" + dbsecretkey);
+//            log.info("googlekey null" + googlekey);
+//        }
 
         GoogleIdTokenVerifier googleIdTokenVerifier =
                 new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
@@ -68,10 +69,10 @@ public class LoginFilterJWTUtil {
             GoogleIdToken.Payload payload = googleIdToken.getPayload();
 
             log.info("GoogleToken Verification success");
-            log.info(payload.getSubject());
-            log.info(payload.getEmail());
-            String name = (String) payload.get("name");
-            log.info(name);
+            //log.info(payload.getSubject());
+            //log.info(payload.getEmail());
+            //String name = (String) payload.get("name");
+            //log.info(name);
             return payload;
         }else{
             log.info("GoogleToken Verification failed");
@@ -106,7 +107,8 @@ public class LoginFilterJWTUtil {
 
 
     public DecodedJWT myTokenVerify(String token){
-        log.info("my token check verify " + token);
+        // 토큰값이 잘들어오나 확인
+        //log.info("my token check verify " + token);
         try {
             DecodedJWT verify = JWT.require(Algorithm.HMAC256(myKey)).build().verify(token);
             log.info("success myToken verify");
@@ -128,6 +130,14 @@ public class LoginFilterJWTUtil {
             return null;
 
         }
+    }
+
+    // 단순 디코더해서 안에 값이 뭐가있는지 체크용
+    public DecodedJWT simpleDecode(String token){
+        DecodedJWT decodeJWT = JWT.decode(token);
+
+        log.info("myToken fail verify : " + decodeJWT);
+        return decodeJWT;
     }
 
 

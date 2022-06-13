@@ -92,18 +92,13 @@ public class TokenJoinService {
                             .password(bCryptPasswordEncoder.encode(dbsecretkey))
                             .roles("ROLE_USER")
                             .nickname((String) googlepayload.get("name"))
+                            .picture((String) googlepayload.get("picture"))
                             .username(googlepayload.getEmail())
                             .oauthname("Google").build();
 
                     userModelRepository.save(joinUserModel); // save 임
                     log.info("save new user email: "+ googlepayload.get("email") );
-
-
                 }
-
-
-
-
 
             } catch (GeneralSecurityException e) {
                 e.printStackTrace();

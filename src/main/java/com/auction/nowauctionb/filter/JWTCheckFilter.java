@@ -85,23 +85,28 @@ public class JWTCheckFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
         }
 
-
-        String username = loginFilterJWTUtil.myTokenVerify(token).getClaim("username").asString();
-
-        // 정상적으로 서명이 완료되고 반환값이 있을 예정
-        if(username != null){
-            UserModel userModel =  userModelRepository.findByUsername(username);
+        try {
+            String username = loginFilterJWTUtil.myTokenVerify(token).getClaim("username").asString();
+            if(username != null){
+                UserModel userModel =  userModelRepository.findByUsername(username);
 
 
-            PrincipalDetails principalDetails = new PrincipalDetails(userModel);
-            // 사용자 인증 , 강제로 객체생성 , 마지막 인자를 보면 꼭 권한을 알려줘야함
-            // Authentication 객체를 생성
-            Authentication authentication =
-                    new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
+                PrincipalDetails principalDetails = new PrincipalDetails(userModel);
+                // 사용자 인증 , 강제로 객체생성 , 마지막 인자를 보면 꼭 권한을 알려줘야함
+                // Authentication 객체를 생성
+                Authentication authentication =
+                        new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
 
-            // 세션 공간, 강제로 시큐리티 세션에 접근, Authentication 객체를 저장
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                // 세션 공간, 강제로 시큐리티 세션에 접근, Authentication 객체를 저장
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+
+        }catch (NullPointerException e){
+            // 즉 verfy 를 실패했을때
+            log.info("JWTCheckFilter username null");
         }
+        // 정상적으로 서명이 완료되고 반환값이 있을 예정
+
         chain.doFilter(request,response);
     }
 }
