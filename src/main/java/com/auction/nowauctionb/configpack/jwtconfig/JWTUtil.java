@@ -50,7 +50,7 @@ public class JWTUtil {
     private String myKey;
 
 
-    private static final long AUTH_TIME = 20*60;
+    private static final long AUTH_TIME = 20;
 
     private static final long REFRESH_TIME = 60*60*24*7;
 
@@ -65,6 +65,7 @@ public class JWTUtil {
 
     //  withExpiresAt => 유효 시간을 정해줌, 우리는 클레임의 exp로 지정
     public String makeAuthToken(UserModel user){
+        log.info("now New make Token : " + user.getUsername());
         return JWT.create()
                 .withSubject(user.getUsername())
                 .withIssuer("nowAuction")
@@ -78,9 +79,11 @@ public class JWTUtil {
 
     // 유저네임을 넣은 Refresh  Token
     public String makeRfreshToken(UserModel user){
+        log.info("now New make refresh Token : " + user.getUsername());
         return JWT.create()
                 .withSubject(user.getUsername())
                 .withIssuer("nowAuction")
+                .withClaim("refresh","refresh")
                 .withClaim("exp", Instant.now().getEpochSecond()+REFRESH_TIME)
                 .sign(Algorithm.HMAC256(myKey));
 
@@ -122,8 +125,8 @@ public class JWTUtil {
             Payload payload = googleIdToken.getPayload();
 
             log.info("Verification success");
-            log.info(payload.getSubject());
-            log.info(payload.getEmail());
+            //log.info(payload.getSubject());
+            //log.info(payload.getEmail());
             String name = (String) payload.get("name");
             log.info(name);
             return payload;

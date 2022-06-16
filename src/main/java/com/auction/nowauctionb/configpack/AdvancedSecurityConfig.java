@@ -36,6 +36,8 @@ public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtSuperintendRepository jwtSuperintendRepository;
 
+
+
     private TokenJoinService tokenJoinService;
 
     // 여기서 등록 나머지에서는 등록하는걸 권장하지않음
@@ -82,7 +84,9 @@ public class AdvancedSecurityConfig extends WebSecurityConfigurerAdapter {
                         jwtSuperintendRepository,
                         userModelRepository)) // AuthenticationManager를 던져줘야함
                 //
-                .addFilter(new JWTCheckFilter(authenticationManager(),loginFilterJWTUtil(), userModelRepository))
+                .addFilter(new JWTCheckFilter(authenticationManager(),
+                        loginFilterJWTUtil(), userModelRepository,
+                        jwtSuperintendRepository))
                 .authorizeRequests()
                 // 로그인시에는 user로 시작하는 모든 url접근은 가능
                 //.antMatchers("/user/**").authenticated()

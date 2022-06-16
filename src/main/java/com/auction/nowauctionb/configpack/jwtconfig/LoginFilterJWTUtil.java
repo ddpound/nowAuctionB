@@ -20,6 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 // 주의 해당 클래스는 필터에 직접 주입해야 해서
 // 컴포넌트 등록을 권장하진 않는다
@@ -45,7 +47,7 @@ public class LoginFilterJWTUtil {
     @Value("${myToken.myKey}")
     private String myKey;
 
-    private final long AUTH_TIME = 20*60;
+    private final long AUTH_TIME = 20;
 
     private final long REFRESH_TIME = 60*60*24*7;
 
@@ -62,6 +64,7 @@ public class LoginFilterJWTUtil {
                         .build();
 
         GoogleIdToken googleIdToken = googleIdTokenVerifier.verify(token);
+
 
         // 값이 나오면 인증 성공
         // 설명이 조금 부실하긴함 인증 하지만 암호화 검증이 제대로 이루어졌는지에 대한 궁금증
@@ -82,6 +85,7 @@ public class LoginFilterJWTUtil {
 
     //  withExpiresAt => 유효 시간을 정해줌, 우리는 클레임의 exp로 지정
     public String makeAuthToken(UserModel user){
+        log.info("now New make Token : " + user.getUsername());
         return JWT.create()
                 .withSubject(user.getUsername())
                 .withIssuer("nowAuction")
@@ -95,9 +99,11 @@ public class LoginFilterJWTUtil {
 
     // 유저네임을 넣은 Refresh  Token
     public String makeRfreshToken(UserModel user){
+        log.info("now New make refresh Token : " + user.getUsername());
         return JWT.create()
                 .withSubject(user.getUsername())
                 .withIssuer("nowAuction")
+                .withClaim("refresh","refresh")
                 .withClaim("exp", Instant.now().getEpochSecond()+REFRESH_TIME)
                 .sign(Algorithm.HMAC256(myKey));
 
@@ -106,20 +112,25 @@ public class LoginFilterJWTUtil {
     }
 
 
-    public DecodedJWT myTokenVerify(String token){
-        // 토큰값이 잘들어오나 확인
-        //log.info("my token check verify " + token);
+
+    // 키와 밸류 형식으로 한번에 해주기
+    // 1이면 검증완료, -2 이면 만료된 토큰, -1 이면 검증실패, 그냥 토큰이 검증실패
+    public Map<Integer,DecodedJWT> returnMapMyTokenVerify(String token){
+        Map<Integer,DecodedJWT> returnMap = new HashMap<>();
+
         try {
             DecodedJWT verify = JWT.require(Algorithm.HMAC256(myKey)).build().verify(token);
             log.info("success myToken verify");
-            return verify;
+            returnMap.put(1, verify);
+            return returnMap;
         }catch (TokenExpiredException e){
             log.info("The myToken has expired"); // 토큰 유효시간이 지남
 
             DecodedJWT decodeJWT = JWT.decode(token);
+            returnMap.put(-2, decodeJWT);
 
             // 재발급이 필요, 리프레시 토큰이 있나 체크해야함
-            return null;
+            return returnMap;
         }
 
         catch (Exception e){
@@ -127,10 +138,13 @@ public class LoginFilterJWTUtil {
             DecodedJWT decodeJWT = JWT.decode(token);
 
             log.info("myToken fail verify : " + decodeJWT);
-            return null;
+            // 실패시
+            returnMap.put(-1, decodeJWT);
+            return returnMap;
 
         }
     }
+
 
     // 단순 디코더해서 안에 값이 뭐가있는지 체크용
     public DecodedJWT simpleDecode(String token){

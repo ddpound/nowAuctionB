@@ -6,10 +6,12 @@ import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.userAssociated.frontmodel.UserModelFront;
 import com.auction.nowauctionb.userAssociated.service.UserService1;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Log4j2
 @RequiredArgsConstructor
 @RestController
 public class UserController1 {
@@ -20,6 +22,8 @@ public class UserController1 {
     public UserModelFront getUserName(Authentication authentication){
 
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+
+        log.info("return / info : " + principalDetails);
 
         return userService1.findUserNameFrontUserModel(principalDetails.getUsername());
     }
