@@ -9,6 +9,8 @@ import com.auction.nowauctionb.configpack.jwtconfig.service.JwtSuperintendServic
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.loginjoin.service.TokenJoinService;
 
+import com.auction.nowauctionb.userAssociated.frontmodel.UserModelFront;
+import com.auction.nowauctionb.userAssociated.service.UserService1;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.log4j.Log4j2;
@@ -35,6 +37,8 @@ public class LoginCotroller1 {
     // JWT 토큰 디비 추척을 위한 서비스
     private final JwtSuperintendService jwtSuperintendService;
 
+    private final UserService1 userService1;
+
     private final TokenJoinService tokenJoinService;
 
     private final JWTUtil jwtUtil;
@@ -58,7 +62,7 @@ public class LoginCotroller1 {
     // 필터에서 한번 걸러서 엔드포인트인 컨트롤러로 올듯
     // 이메일을 체크후 자동 회원가입 및 자동 로그인 해야함
     @GetMapping (value = "login/token/google")
-    public String loginTryGoogle(Authentication authentication , HttpServletResponse response) {
+    public UserModelFront loginTryGoogle(Authentication authentication , HttpServletResponse response) {
 
         try {
             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
@@ -75,15 +79,15 @@ public class LoginCotroller1 {
 
             jwtSuperintendService.saveCheckTokenRepository(principalDetails.getUsername(),makeMyToken,makeRefleshToken);
 
-
+            return userService1.findUserNameFrontUserModel(principalDetails.getUsername());
+            //return "seuccess";
         }catch (NullPointerException e){
             log.info("principalDetails is null, LoginController");
+            return null;
         }
-
-
         // 처음 로그인할때 exchang 메소드를 이용해서 아이디 검증후 없다면
         // join문 실행해줘도 될듯
-        return "loginSuccess";
+
     }
 
     // google token으로 회원가입하겠다는 뜻

@@ -53,11 +53,23 @@ public class UserService1 {
 
         }
 
-
-
         return null;
     }
-    
 
+    @Transactional
+    public int deleteUser(String username){
+
+        // 이메일을 통해서 찾아냄
+        UserModel finduserModel = userModelRepository.findByUsername(username);
+
+        try {
+            userModelRepository.delete(finduserModel);
+            return 1;
+        }catch (Exception e){
+            e.printStackTrace();
+            return -1;
+        }
+
+    }
 
 }

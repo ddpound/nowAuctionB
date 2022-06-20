@@ -56,7 +56,8 @@ public class JwtSuperintendService {
                     .accessToken(makeMyToken)
                     .refreshToken(makeRefleshToken)
                     .build();
-
+            // 더티체킹
+            userModel.setJwtSuperintendModel(jwtSuperintendModel);
             jwtSuperintendRepository.save(jwtSuperintendModel);
         }
 

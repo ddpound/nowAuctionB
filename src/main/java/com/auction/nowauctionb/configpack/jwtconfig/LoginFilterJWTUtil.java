@@ -47,7 +47,7 @@ public class LoginFilterJWTUtil {
     @Value("${myToken.myKey}")
     private String myKey;
 
-    private final long AUTH_TIME = 20;
+    private final long AUTH_TIME = 20*60;
 
     private final long REFRESH_TIME = 60*60*24*7;
 

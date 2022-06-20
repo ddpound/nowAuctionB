@@ -85,7 +85,7 @@ public class JWTCheckFilter extends BasicAuthenticationFilter {
         //System.out.println("테스트 헤더값체크 : " + jwtHeader);
         // 늘 리프레시와 액세스를 동시에 받아야함
         if(jwtHeader == null || !jwtHeader.startsWith("Bearer")
-                || reFreshJwtHeader ==null || !reFreshJwtHeader.startsWith("Bearer")){
+                || reFreshJwtHeader == null || !reFreshJwtHeader.startsWith("Bearer")){
             chain.doFilter(request, response);
         }
 
@@ -103,9 +103,18 @@ public class JWTCheckFilter extends BasicAuthenticationFilter {
             // 마찬가지로 넘겨주고 끝내버림
             chain.doFilter(request, response);
         }
+        // 아주중요함 두 체인필터를 타고 다시 돌아온다.
+        // 이걸 왜 체인끝에 두는 지알겠음
+        // 체인 -> 컨트롤러 -> 다시체인(즉 나갈때)이순인데
+        // dofilter해서 컨트롤러를 보낸 다음에 여기로 다시옴;;
 
         // 구글 토큰 이라면 리프레시 토큰은 없음 그리고 일반 토큰이라면 있으니 여기배치
-        String reFreshtoken = reFreshJwtHeader.replace("Bearer ", "");
+        String reFreshtoken = null;
+
+        if(reFreshJwtHeader != null){
+            reFreshtoken = reFreshJwtHeader.replace("Bearer ", "");
+        }
+
 
         // 1일때 검증완료, -2 면 토큰 만료
         // 이렇게 담아두면 다시 재 검증할 필요가 없음
@@ -121,6 +130,10 @@ public class JWTCheckFilter extends BasicAuthenticationFilter {
                 // 리프레시 토큰 검증 시작, 값 변경
                 resultMapToken = loginFilterJWTUtil.returnMapMyTokenVerify(reFreshtoken);
 
+                // 여기서 만약 또 리프레시마저 만료라면 재 로그인 시도를 유도해야함
+                if(resultMapToken.containsKey(-2)){
+                    chain.doFilter(request,response);
+                }
             }
 
 
@@ -133,7 +146,7 @@ public class JWTCheckFilter extends BasicAuthenticationFilter {
                 if(resultMapToken.get(1).getClaim("refresh").asString() != null){
 
                     // 리프레시 토큰, 액세스 토큰 다 DB검색
-
+                    // 디비에 한쌍으로 검색
                     UserModel userModel = jwtSuperintendRepository.findByAccessTokenAndRefreshToken(token,reFreshtoken).getUser();
 
                     String newAccessToken = loginFilterJWTUtil.makeAuthToken(userModel);

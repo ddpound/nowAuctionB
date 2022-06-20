@@ -1,13 +1,11 @@
 package com.auction.nowauctionb.loginjoin.model;
 
 
+import com.auction.nowauctionb.configpack.jwtconfig.model.JwtSuperintendModel;
 import lombok.*;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,6 +50,11 @@ public class UserModel {
         }
         return new ArrayList<>();
     }
+
+    @OneToOne(
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    public JwtSuperintendModel jwtSuperintendModel;
 
     //최초 로그인 날짜와
 
