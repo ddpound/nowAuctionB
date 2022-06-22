@@ -126,14 +126,9 @@ public class JWTCheckFilter extends BasicAuthenticationFilter {
 
             // -2 즉 만료일 때
             if(resultMapToken.containsKey(-2)){
-
                 // 리프레시 토큰 검증 시작, 값 변경
                 resultMapToken = loginFilterJWTUtil.returnMapMyTokenVerify(reFreshtoken);
 
-                // 여기서 만약 또 리프레시마저 만료라면 재 로그인 시도를 유도해야함
-                if(resultMapToken.containsKey(-2)){
-                    chain.doFilter(request,response);
-                }
             }
 
 
@@ -146,19 +141,20 @@ public class JWTCheckFilter extends BasicAuthenticationFilter {
                 if(resultMapToken.get(1).getClaim("refresh").asString() != null){
 
                     // 리프레시 토큰, 액세스 토큰 다 DB검색
-                    // 디비에 한쌍으로 검색
+                    // 디비에 한쌍으로 검색, 만약 없다면 누가 탈취해서 임의로 값을 넣은걸 의심
                     UserModel userModel = jwtSuperintendRepository.findByAccessTokenAndRefreshToken(token,reFreshtoken).getUser();
 
                     String newAccessToken = loginFilterJWTUtil.makeAuthToken(userModel);
-                    String newRefreshToken = loginFilterJWTUtil.makeRfreshToken(userModel);
+
+                    //리프레시까지 다시 재발급이아니라 액세스만 재발급해서 다시 DB한쌍에 저장
+                    //String newRefreshToken = loginFilterJWTUtil.makeRfreshToken(userModel);
 
                     response.addHeader(HttpHeaders.AUTHORIZATION,"Bearer "+ newAccessToken);
-                    response.addHeader("RefreshToken","Bearer "+ newRefreshToken);
+                    response.addHeader("RefreshToken","Bearer "+ reFreshtoken);
 
                     jwtSuperintendRepository
-                            .updateAcTokenRefreshToken(
+                            .updateAcToken(
                                     newAccessToken,
-                                    newRefreshToken,
                                     userModel
                             );
                     resultMapToken = loginFilterJWTUtil.returnMapMyTokenVerify(newAccessToken);
@@ -181,9 +177,15 @@ public class JWTCheckFilter extends BasicAuthenticationFilter {
                 // 세션 공간, 강제로 시큐리티 세션에 접근, Authentication 객체를 저장
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
+            // 여기서 만약 또 리프레시마저 만료라면 재 로그인 시도를 유도해야함
+            if(resultMapToken.containsKey(-2)){
+                chain.doFilter(request,response);
+            }
 
         }catch (NullPointerException e){
-            e.printStackTrace();
+            // 토큰,리프레시 토큰 검색시 결과값이 없을때 , 회원가입을 다시해야하거나
+            // 다양한 문제가 발생
+
             // 즉 verfy 를 실패했을때
             log.info("JWTCheckFilter username null");
         }

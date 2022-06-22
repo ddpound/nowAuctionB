@@ -7,6 +7,8 @@ import com.auction.nowauctionb.userAssociated.frontmodel.UserModelFront;
 import com.auction.nowauctionb.userAssociated.service.UserService1;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,13 +23,23 @@ public class UserController1 {
     private final UserService1 userService1;
 
     @GetMapping(value = "user/info")
-    public UserModelFront getUserName(Authentication authentication){
+    public ResponseEntity getUserName(Authentication authentication){
 
-        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        try{
+            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
-        log.info("return / info : " + principalDetails);
+            log.info("return / info : " + principalDetails);
+            //return userService1.findUserNameFrontUserModel(principalDetails.getUsername());
+            return new ResponseEntity<>(userService1.findUserNameFrontUserModel(principalDetails.getUsername()),HttpStatus.OK);
+        }catch (NullPointerException e){
+            return new ResponseEntity<>("plese login",HttpStatus.FORBIDDEN);
+        }
+        catch (Exception e){
+            return new ResponseEntity<>("server error",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
-        return userService1.findUserNameFrontUserModel(principalDetails.getUsername());
+
+
     }
 
     @DeleteMapping(value = "user/delete/{username}")

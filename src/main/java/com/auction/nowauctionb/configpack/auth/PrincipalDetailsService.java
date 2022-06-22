@@ -39,20 +39,18 @@ public class PrincipalDetailsService implements UserDetailsService {
 
         try {
             if (userModel != null) {
-                //  시큐리티 세션 = Authentication( UserDetails) 이렇게 담겨진다
+                // 시큐리티 세션 = Authentication( UserDetails) 이렇게 담겨진다
                 // 그다음에는
                 // 시큐리티 세션 ( Authentication( UserDetails) ) 이렇게 또 담긴다
                 // 원래 대로라면
                 // 그리고 세션이 만들어지면서 로그인이 완료됩니다.
-                //log.info("principaldetail password : " + userModel.getPassword());
+                // log.info("principaldetail password : " + userModel.getPassword());
                 // 여기서 넘겨주고 다시 받아줘야 로그인 완료
                 return new PrincipalDetails(userModel);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-
-
         }
         // null이라는 뜻은 해당유저가 아니라는뜻
         return null;

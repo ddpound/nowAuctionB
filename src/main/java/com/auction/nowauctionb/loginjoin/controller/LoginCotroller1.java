@@ -14,6 +14,8 @@ import com.auction.nowauctionb.userAssociated.service.UserService1;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 
@@ -62,7 +64,7 @@ public class LoginCotroller1 {
     // 필터에서 한번 걸러서 엔드포인트인 컨트롤러로 올듯
     // 이메일을 체크후 자동 회원가입 및 자동 로그인 해야함
     @GetMapping (value = "login/token/google")
-    public UserModelFront loginTryGoogle(Authentication authentication , HttpServletResponse response) {
+    public ResponseEntity loginTryGoogle(Authentication authentication , HttpServletResponse response) {
 
         try {
             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
@@ -79,11 +81,11 @@ public class LoginCotroller1 {
 
             jwtSuperintendService.saveCheckTokenRepository(principalDetails.getUsername(),makeMyToken,makeRefleshToken);
 
-            return userService1.findUserNameFrontUserModel(principalDetails.getUsername());
+            return new ResponseEntity<>( userService1.findUserNameFrontUserModel(principalDetails.getUsername()), HttpStatus.OK);
             //return "seuccess";
         }catch (NullPointerException e){
             log.info("principalDetails is null, LoginController");
-            return null;
+            return new ResponseEntity(HttpStatus.UNAUTHORIZED);
         }
         // 처음 로그인할때 exchang 메소드를 이용해서 아이디 검증후 없다면
         // join문 실행해줘도 될듯
@@ -92,7 +94,7 @@ public class LoginCotroller1 {
 
     // google token으로 회원가입하겠다는 뜻
     @PostMapping(value = "join/googletoken")
-    public String joinController(HttpServletRequest request){
+    public ResponseEntity joinController(HttpServletRequest request){
 
 
 
@@ -100,7 +102,7 @@ public class LoginCotroller1 {
         tokenJoinService.googleTokenJoingetHeader(request);
 
 
-        return "Your membership registration is complete.";
+        return new ResponseEntity<>( "Your membership registration is complete.", HttpStatus.OK);
     }
 
 

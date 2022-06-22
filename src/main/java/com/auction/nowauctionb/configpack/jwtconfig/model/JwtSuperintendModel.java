@@ -2,7 +2,6 @@ package com.auction.nowauctionb.configpack.jwtconfig.model;
 
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import lombok.*;
-import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -22,7 +21,7 @@ public class JwtSuperintendModel {
     private int id;
 
     @JoinColumn(name = "user")
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     private UserModel user;
 
     private String accessToken;

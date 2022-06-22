@@ -23,4 +23,11 @@ public interface JwtSuperintendRepository extends JpaRepository<JwtSuperintendMo
     void updateAcTokenRefreshToken(@Param("accessToken")String accessToken,
                                    @Param("refreshToken")String refreshToken,
                                    @Param("user") UserModel user);
+
+    @Transactional
+    @Modifying
+    @Query("update JwtSuperintendModel set accessToken = :accessToken," +
+            "modifyToken = current_timestamp where user = :user")
+    void updateAcToken(@Param("accessToken")String accessToken,
+                       @Param("user") UserModel user);
 }

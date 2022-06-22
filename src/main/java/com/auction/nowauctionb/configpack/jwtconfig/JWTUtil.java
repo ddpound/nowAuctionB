@@ -50,9 +50,11 @@ public class JWTUtil {
     private String myKey;
 
 
-    private static final long AUTH_TIME = 20*60;
+    @Value("${tokenVerifyTime.accesstimeSet}")
+    private long AUTH_TIME;
 
-    private static final long REFRESH_TIME = 60*60*24*7;
+    @Value("${tokenVerifyTime.refreshTimeSet}")
+    private long REFRESH_TIME;
 
     // null 값 방지를 위해서 @PostConstruct 를 이용해 값을 강제로 주입했습니다
 //    @PostConstruct
