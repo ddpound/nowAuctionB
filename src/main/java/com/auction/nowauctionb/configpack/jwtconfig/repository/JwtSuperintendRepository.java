@@ -16,6 +16,8 @@ public interface JwtSuperintendRepository extends JpaRepository<JwtSuperintendMo
 
     JwtSuperintendModel findByAccessTokenAndRefreshToken(String AccessToken, String RefreshToken);
 
+    void deleteByUser(UserModel userModel);
+
     @Transactional
     @Modifying
     @Query("update JwtSuperintendModel set accessToken = :accessToken, " +

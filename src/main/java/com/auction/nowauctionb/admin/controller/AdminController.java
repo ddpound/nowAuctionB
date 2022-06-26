@@ -10,19 +10,11 @@ public class AdminController {
 
     @GetMapping(value = "info")
     public String setAdminUrl(){
-        
 
         return "successAdmin";
     }
 
-    @GetMapping(value = "give-admin")
-    public String giveMeAdmin(){
 
-
-
-
-        return "";
-    }
 
 
 }

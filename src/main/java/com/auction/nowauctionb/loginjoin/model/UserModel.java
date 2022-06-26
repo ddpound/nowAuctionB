@@ -51,11 +51,6 @@ public class UserModel {
         return new ArrayList<>();
     }
 
-    @OneToOne(
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
-    public JwtSuperintendModel jwtSuperintendModel;
-
     //최초 로그인 날짜와
 
 

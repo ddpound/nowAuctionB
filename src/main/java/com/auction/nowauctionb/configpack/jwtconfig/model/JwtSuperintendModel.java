@@ -21,7 +21,7 @@ public class JwtSuperintendModel {
     private int id;
 
     @JoinColumn(name = "user")
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne
     private UserModel user;
 
     private String accessToken;

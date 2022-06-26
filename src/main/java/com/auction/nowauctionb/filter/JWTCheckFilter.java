@@ -170,7 +170,7 @@ public class JWTCheckFilter extends BasicAuthenticationFilter {
                 PrincipalDetails principalDetails = new PrincipalDetails(userModel);
                 // 사용자 인증 , 강제로 객체생성 , 마지막 인자를 보면 꼭 권한을 알려줘야함
                 // Authentication 객체를 생성
-                System.out.println(principalDetails.getUsername()+"aaaaaaaaaaaaaaaaaaaaaaa");
+
                 Authentication authentication =
                         new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
 

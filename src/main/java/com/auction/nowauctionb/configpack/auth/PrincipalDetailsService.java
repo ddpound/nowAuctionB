@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PrincipalDetailsService implements UserDetailsService {
 
-
     private final UserModelRepository userModelRepository;
 
     // 시큐리티 세션 = Authentication = UserDetails
@@ -48,14 +47,10 @@ public class PrincipalDetailsService implements UserDetailsService {
                 // 여기서 넘겨주고 다시 받아줘야 로그인 완료
                 return new PrincipalDetails(userModel);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
         // null이라는 뜻은 해당유저가 아니라는뜻
         return null;
-
     }
-
-
 }
