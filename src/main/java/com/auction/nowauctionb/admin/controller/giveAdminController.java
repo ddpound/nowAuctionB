@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -17,13 +17,18 @@ public class giveAdminController {
 
     private final AdminService1 adminService1;
 
-    @GetMapping(value = "give-admin/{adminpassword}")
-    public ResponseEntity giveMeAdmin(@PathVariable("adminpassword")String password,
+    @PostMapping(value = "give-admin")
+    public ResponseEntity giveMeAdmin(@RequestBody Map<String,Object> passwordMap,
                                       Authentication authentication){
-        System.out.println(password);
-        adminService1.giveAdmin(authentication,password);
+        int resultNum = adminService1.giveAdmin(authentication,passwordMap);
 
-        return new ResponseEntity(HttpStatus.OK);
+        if(resultNum ==1){
+            return new ResponseEntity(HttpStatus.OK);
+        }else{
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+        }
+
+
     }
 
 

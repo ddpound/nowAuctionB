@@ -24,8 +24,10 @@ public class JwtSuperintendModel {
     @OneToOne
     private UserModel user;
 
+    @Column(length = 600)
     private String accessToken;
 
+    @Column(length = 600)
     private String refreshToken;
 
     @CreationTimestamp
