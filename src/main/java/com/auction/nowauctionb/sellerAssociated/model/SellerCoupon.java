@@ -2,15 +2,22 @@ package com.auction.nowauctionb.sellerAssociated.model;
 
 
 import com.auction.nowauctionb.loginjoin.model.UserModel;
+import lombok.*;
 
 import javax.persistence.*;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Entity
 public class SellerCoupon {
 
 
     // 쿠폰 고유번호
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     // 쿠폰의 비밀번호

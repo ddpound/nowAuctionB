@@ -13,7 +13,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
-public class giveAdminController {
+public class GiveAdminController {
 
     private final AdminService1 adminService1;
 

@@ -4,6 +4,8 @@ package com.auction.nowauctionb.admin.service;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
+import com.auction.nowauctionb.sellerAssociated.model.SellerCoupon;
+import com.auction.nowauctionb.sellerAssociated.repository.SellerCouponRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -13,6 +15,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -21,6 +25,8 @@ import java.util.Map;
 public class AdminService1 {
 
     private final UserModelRepository userModelRepository;
+
+    private final SellerCouponRepository sellerCouponRepository;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -54,14 +60,30 @@ public class AdminService1 {
 
     // DB에 판매자 쿠폰 등록을 만들어주는 서비스
     @Transactional
-    public int makeCoupon(){
+    public int makeCoupon(String num){
 
-        int length = 20;
+        int length = 12;
         boolean useLetters = true;
         boolean useNumbers = false;
-        String generatedString = RandomStringUtils.random(length, useLetters, useNumbers);
 
-        System.out.println(generatedString);
+
+        if(num == null){
+            num = "1";
+        }
+
+        int newNum = Integer.parseInt(num);
+
+        List<SellerCoupon> listSeller = new ArrayList<>();
+
+        for (int i = 0; i < newNum ; i++) {
+            String generatedString = RandomStringUtils.random(length, useLetters, useNumbers);
+
+
+            listSeller.add(SellerCoupon.builder().couponPassword(generatedString).build());
+        }
+
+        sellerCouponRepository.saveAll(listSeller);
+
 
         return 1;
     }
