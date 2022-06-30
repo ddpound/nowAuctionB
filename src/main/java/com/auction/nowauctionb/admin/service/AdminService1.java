@@ -4,6 +4,7 @@ package com.auction.nowauctionb.admin.service;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
+import com.auction.nowauctionb.sellerAssociated.frontmodel.SellerCouponFront;
 import com.auction.nowauctionb.sellerAssociated.model.SellerCoupon;
 import com.auction.nowauctionb.sellerAssociated.repository.SellerCouponRepository;
 import lombok.RequiredArgsConstructor;
@@ -62,9 +63,9 @@ public class AdminService1 {
     @Transactional
     public int makeCoupon(String num){
 
-        int length = 12;
+        int length = 15;
         boolean useLetters = true;
-        boolean useNumbers = false;
+        boolean useNumbers = true;
 
 
         if(num == null){
@@ -86,6 +87,45 @@ public class AdminService1 {
 
 
         return 1;
+    }
+
+    @Transactional
+    public int deleteCoupon(int id){
+
+        return 1;
+    }
+
+
+    // 따로 담아서 줘야함
+    @Transactional(readOnly = true)
+    public List<SellerCouponFront> findAllCoupon(){
+
+        List<SellerCoupon> resultCouponlist = sellerCouponRepository.findAll();
+
+        ArrayList<SellerCouponFront> sellerCouponFrontsArray = new ArrayList<>();
+
+        
+        for (SellerCoupon list : resultCouponlist
+             ) {
+            if(list != null && list.getUserModel() != null){
+                sellerCouponFrontsArray.add(SellerCouponFront
+                        .builder()
+                        .id(list.getId())
+                        .couponCode(list.getCouponPassword())
+                        .userId(list.getUserModel().getUserId())
+                        .userName(list.getUserModel().getUsername())
+                        .build());
+            }else if(list != null){
+                sellerCouponFrontsArray.add(SellerCouponFront
+                        .builder()
+                        .id(list.getId())
+                        .couponCode(list.getCouponPassword())
+                        .build());
+            }
+
+        }
+
+        return sellerCouponFrontsArray;
     }
 
 

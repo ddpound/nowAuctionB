@@ -4,6 +4,8 @@ import com.auction.nowauctionb.configpack.jwtconfig.model.JwtSuperintendModel;
 import com.auction.nowauctionb.configpack.jwtconfig.repository.JwtSuperintendRepository;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
+import com.auction.nowauctionb.sellerAssociated.repository.SellerCouponRepository;
+import com.auction.nowauctionb.sellerAssociated.service.SellerService1;
 import com.auction.nowauctionb.userAssociated.frontmodel.UserModelFront;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,8 @@ public class UserService1 {
     private final UserModelRepository userModelRepository;
 
     private final JwtSuperintendRepository jwtSuperintendRepository;
+
+    private final SellerCouponRepository sellerCouponRepository;
 
 
 
@@ -64,6 +68,7 @@ public class UserService1 {
 
 
         try {
+            sellerCouponRepository.deleteByUserModel(finduserModel);
             jwtSuperintendRepository.deleteByUser(finduserModel);
             userModelRepository.delete(finduserModel);
             return 1;

@@ -8,12 +8,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("admin")
 public class AdminController {
 
     private final AdminService1 adminService1;
+
+
+
 
     @GetMapping(value = "info")
     public String setAdminUrl(){
@@ -32,6 +37,15 @@ public class AdminController {
 
 
         return new ResponseEntity("success make coupon",HttpStatus.OK);
+    }
+
+    @GetMapping(value = "find-all-coupon")
+    public ResponseEntity findAllCoupon(){
+
+
+
+
+        return new ResponseEntity(adminService1.findAllCoupon(), HttpStatus.OK);
     }
 
 
