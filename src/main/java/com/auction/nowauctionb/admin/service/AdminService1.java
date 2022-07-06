@@ -91,7 +91,7 @@ public class AdminService1 {
 
     @Transactional
     public int deleteCoupon(int id){
-
+        sellerCouponRepository.deleteById(id);
         return 1;
     }
 

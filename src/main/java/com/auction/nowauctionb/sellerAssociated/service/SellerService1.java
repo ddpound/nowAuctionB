@@ -10,7 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -29,8 +28,6 @@ public class SellerService1 {
         SellerCoupon findSellerCoupon =
                 sellerCouponRepository.findByIdAndCouponPassword(Integer.parseInt(id),code);
 
-
-
         // 등록된쿠폰 아님
         if(findSellerCoupon ==null){
             return -1;
@@ -44,8 +41,6 @@ public class SellerService1 {
         // 새쿠폰이라면 그럼 쿠폰 등록자를 해주자
         findSellerCoupon.setUserModel(userModel);
         userModel.setRoles("ROLE_USER,ROLE_SELLER");
-
-
         return 1;
     }
 

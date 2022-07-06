@@ -17,13 +17,8 @@ public class AdminController {
 
     private final AdminService1 adminService1;
 
-
-
-
     @GetMapping(value = "info")
     public String setAdminUrl(){
-
-
 
 
         return "successAdmin";
@@ -42,10 +37,15 @@ public class AdminController {
     @GetMapping(value = "find-all-coupon")
     public ResponseEntity findAllCoupon(){
 
-
-
-
         return new ResponseEntity(adminService1.findAllCoupon(), HttpStatus.OK);
+    }
+
+    @DeleteMapping(value = "delete-one-coupon/{id}")
+    public ResponseEntity deleteOneCoupon(@PathVariable("id")int id){
+
+        adminService1.deleteCoupon(id);
+
+        return new ResponseEntity("deleteSuccess", HttpStatus.OK);
     }
 
 
