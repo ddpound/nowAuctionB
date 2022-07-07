@@ -10,33 +10,31 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-@Getter
+@AllArgsConstructor
 @Setter
+@Getter
 @Entity
-public class SellerCoupon {
+public class ShoppinMallModel {
 
-
-    // 쿠폰 고유번호
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    // 쿠폰의 비밀번호
-    // 넉넉하게
-    @Column(length = 500)
-    private String couponPassword;
+    private String ShoppingMallName;
 
-    // 하나의 유저가 쿠폰을 가진 형태
+    @JoinColumn(name = "create_user")
     @OneToOne
-    @JoinColumn(name = "user_id")
     private UserModel userModel;
 
+    // 사진 경로를 남길듯
+    @Column(length = 800)
+    private String thumnail;
+
     @CreationTimestamp
-    private Timestamp createCoupon;
+    private Timestamp createShoppinMall;
 
     @UpdateTimestamp
-    private Timestamp modifyCoupon;
+    private Timestamp modifyShoppinMall;
 
 }

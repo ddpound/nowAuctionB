@@ -5,6 +5,7 @@ import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
 import com.auction.nowauctionb.sellerAssociated.model.SellerCoupon;
 import com.auction.nowauctionb.sellerAssociated.repository.SellerCouponRepository;
+import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepositry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,8 @@ public class SellerService1 {
 
     //권한 등록을 바꿔줘야함
     private final UserModelRepository userModelRepository;
+
+    private final ShoppingMallModelRepositry shoppingMallModelRepositry;
 
     @Transactional
     public int sellerRegister(Authentication authentication, String id, String code){
@@ -45,7 +48,7 @@ public class SellerService1 {
     }
 
 
-
+    
 
 
 

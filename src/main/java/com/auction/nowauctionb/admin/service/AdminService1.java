@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Log4j2
@@ -89,8 +90,15 @@ public class AdminService1 {
         return 1;
     }
 
+    // 삭제할 때 유저 권환도 취소해야함
     @Transactional
     public int deleteCoupon(int id){
+
+        // 영속화
+        Optional<SellerCoupon> sellerCoupon = sellerCouponRepository.findById(id);
+        // 더티체킹
+        sellerCoupon.get().getUserModel().setRoles("ROLE_USER");
+
         sellerCouponRepository.deleteById(id);
         return 1;
     }
