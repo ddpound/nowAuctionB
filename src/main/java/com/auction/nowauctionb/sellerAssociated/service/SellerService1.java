@@ -4,9 +4,13 @@ import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
 import com.auction.nowauctionb.sellerAssociated.model.SellerCoupon;
+import com.auction.nowauctionb.sellerAssociated.model.ShoppinMallModel;
 import com.auction.nowauctionb.sellerAssociated.repository.SellerCouponRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepositry;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,8 +51,15 @@ public class SellerService1 {
         return 1;
     }
 
+    @Transactional(readOnly = true)
+    public ShoppinMallModel checkShoppingMall(PrincipalDetails principalDetails){
 
-    
+        return shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
+
+    }
+
+
+
 
 
 

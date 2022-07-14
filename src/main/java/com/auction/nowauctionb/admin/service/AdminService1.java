@@ -96,8 +96,12 @@ public class AdminService1 {
 
         // 영속화
         Optional<SellerCoupon> sellerCoupon = sellerCouponRepository.findById(id);
-        // 더티체킹
-        sellerCoupon.get().getUserModel().setRoles("ROLE_USER");
+
+        if(sellerCoupon.get().getUserModel() != null ){
+            // 더티체킹
+            sellerCoupon.get().getUserModel().setRoles("ROLE_USER");
+        }
+
 
         sellerCouponRepository.deleteById(id);
         return 1;
