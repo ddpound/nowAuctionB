@@ -48,9 +48,10 @@ public class SellerController1 {
     @PostMapping("make-shopping-mall")
     public ResponseEntity makeMyShoppingMall(@RequestParam("shoppingMallName") String shoppingmallName,
                                              @RequestParam("thumbnail") MultipartFile multipartFile,
+                                             @RequestParam("explantion") String shoppingMallExplanation,
                                              Authentication authentication) throws IOException {
 
-        shoppingMallService1.SaveNewShoppingMall(authentication , multipartFile,shoppingmallName);
+        shoppingMallService1.SaveNewShoppingMall(authentication , multipartFile,shoppingmallName , shoppingMallExplanation);
 
 
         return new ResponseEntity("", HttpStatus.OK);
