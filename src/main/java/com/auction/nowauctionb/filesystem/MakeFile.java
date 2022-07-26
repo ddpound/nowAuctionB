@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,8 @@ public class MakeFile {
 //    유저아이디-(종류썸네일,제품)-UUID
 
     public String makeFileImage(UserModel userModel,
-                             MultipartFile multipartFile){
+                                MultipartFile multipartFile,
+                                HttpServletRequest request){
 
         // 현재 날짜 구하기
         LocalDate now = LocalDate.now();
@@ -58,8 +60,10 @@ public class MakeFile {
             FileUtils.deleteQuietly(targetFile);
         }
 
+        // 배포때는 수정해야할 듯
+        String mainurl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/";
 
-        return saveFolderName.substring(saveFolderName.indexOf("Jang")) + savedFileName;
+        return mainurl+saveFolderName.substring(saveFolderName.indexOf("Jang")) + savedFileName;
     }
 
 }

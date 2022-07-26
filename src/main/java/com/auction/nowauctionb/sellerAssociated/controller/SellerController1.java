@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
@@ -49,9 +50,13 @@ public class SellerController1 {
     public ResponseEntity makeMyShoppingMall(@RequestParam("shoppingMallName") String shoppingmallName,
                                              @RequestParam("thumbnail") MultipartFile multipartFile,
                                              @RequestParam("explantion") String shoppingMallExplanation,
-                                             Authentication authentication) throws IOException {
+                                             Authentication authentication,
+                                             HttpServletRequest request) throws IOException {
 
-        int resultNum = shoppingMallService1.SaveNewShoppingMall(authentication , multipartFile,shoppingmallName , shoppingMallExplanation);
+        int resultNum = shoppingMallService1.SaveNewShoppingMall(authentication ,
+                multipartFile,
+                shoppingmallName,
+                shoppingMallExplanation,request);
 
         if(resultNum == 1){
             return new ResponseEntity("", HttpStatus.OK);

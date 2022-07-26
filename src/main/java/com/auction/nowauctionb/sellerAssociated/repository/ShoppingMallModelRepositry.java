@@ -11,4 +11,6 @@ public interface ShoppingMallModelRepositry extends JpaRepository<ShoppinMallMod
     // 이름 중복 검사
     ShoppinMallModel findByShoppingMallName(String shoppingMallName);
 
+    void deleteByUserModel(UserModel userModel);
+
 }

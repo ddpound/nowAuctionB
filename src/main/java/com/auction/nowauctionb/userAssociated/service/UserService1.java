@@ -5,6 +5,7 @@ import com.auction.nowauctionb.configpack.jwtconfig.repository.JwtSuperintendRep
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.SellerCouponRepository;
+import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepositry;
 import com.auction.nowauctionb.sellerAssociated.service.SellerService1;
 import com.auction.nowauctionb.userAssociated.frontmodel.UserModelFront;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,8 @@ public class UserService1 {
     private final JwtSuperintendRepository jwtSuperintendRepository;
 
     private final SellerCouponRepository sellerCouponRepository;
+
+    private final ShoppingMallModelRepositry shoppingMallModelRepositry;
 
 
 
@@ -68,9 +71,15 @@ public class UserService1 {
 
 
         try {
+            // 연관관계 삭제
             sellerCouponRepository.deleteByUserModel(finduserModel);
             jwtSuperintendRepository.deleteByUser(finduserModel);
+            shoppingMallModelRepositry.deleteByUserModel(finduserModel);
+
+            // 마지막 유저삭제
             userModelRepository.delete(finduserModel);
+
+
             return 1;
         }catch (Exception e){
             e.printStackTrace();

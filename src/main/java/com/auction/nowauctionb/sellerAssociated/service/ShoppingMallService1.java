@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,7 +31,8 @@ public class ShoppingMallService1 {
     public int SaveNewShoppingMall(Authentication authentication,
                                    MultipartFile multipartFile,
                                    String shoppingMallName,
-                                   String shoppingMallExplanation){
+                                   String shoppingMallExplanation,
+                                   HttpServletRequest request){
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
         // 12길이보다 길면
@@ -47,14 +49,15 @@ public class ShoppingMallService1 {
         }
 
         // 파일저장
-        String fileName = makeFile.makeFileImage(principalDetails.getUserModel(), multipartFile);
+        String fileName = makeFile.makeFileImage(principalDetails.getUserModel(), multipartFile,request);
 
         ShoppinMallModel shoppinMallModelSave =
                 ShoppinMallModel.builder()
-                .shoppingMallName(shoppingMallName)
-                .shppingMallExplanation(shoppingMallExplanation)
-                .thumnail(fileName)
-                .build();
+                        .shoppingMallName(shoppingMallName)
+                        .shppingMallExplanation(shoppingMallExplanation)
+                        .thumnail(fileName)
+                        .userModel(principalDetails.getUserModel())
+                        .build();
 
         shoppingMallModelRepositry.save(shoppinMallModelSave);
 
