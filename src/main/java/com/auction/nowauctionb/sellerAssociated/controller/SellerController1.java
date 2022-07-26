@@ -51,10 +51,16 @@ public class SellerController1 {
                                              @RequestParam("explantion") String shoppingMallExplanation,
                                              Authentication authentication) throws IOException {
 
-        shoppingMallService1.SaveNewShoppingMall(authentication , multipartFile,shoppingmallName , shoppingMallExplanation);
+        int resultNum = shoppingMallService1.SaveNewShoppingMall(authentication , multipartFile,shoppingmallName , shoppingMallExplanation);
 
-
-        return new ResponseEntity("", HttpStatus.OK);
+        if(resultNum == 1){
+            return new ResponseEntity("", HttpStatus.OK);
+        } else if (resultNum == -2) {
+            // 중복된 쇼핑몰 이름
+            return new ResponseEntity("Already-ShoppingMall-Name",HttpStatus.BAD_REQUEST);
+        } else {
+            return new ResponseEntity("", HttpStatus.BAD_REQUEST);
+        }
     }
 
 

@@ -32,8 +32,20 @@ public class SellerService1 {
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
         UserModel userModel = userModelRepository.findByUsername(principalDetails.getUsername());
-        SellerCoupon findSellerCoupon =
-                sellerCouponRepository.findByIdAndCouponPassword(Integer.parseInt(id),code);
+        SellerCoupon findSellerCoupon = null;
+        try {
+            findSellerCoupon = sellerCouponRepository.findByIdAndCouponPassword(Integer.parseInt(id),code);
+        }catch (NumberFormatException e){
+            return -5; // id가 String이 아닐때
+        }
+
+
+
+
+        // 키값이 날라오지 않음
+        if(id.equals("") && code.equals("")){
+            return -3;
+        }
 
         // 등록된쿠폰 아님
         if(findSellerCoupon ==null){

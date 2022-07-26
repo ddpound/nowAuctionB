@@ -8,4 +8,7 @@ public interface ShoppingMallModelRepositry extends JpaRepository<ShoppinMallMod
 
     ShoppinMallModel findByUserModel(UserModel userModel);
 
+    // 이름 중복 검사
+    ShoppinMallModel findByShoppingMallName(String shoppingMallName);
+
 }

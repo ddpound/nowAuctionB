@@ -25,9 +25,8 @@ public class MakeFile {
 //    제목 파일 (제목,아님 썸네일 - UUID)
 //    유저아이디-(종류썸네일,제품)-UUID
 
-    public int makeFileImage(UserModel userModel,
-                             MultipartFile multipartFile,
-                             String shoppingMallName){
+    public String makeFileImage(UserModel userModel,
+                             MultipartFile multipartFile){
 
         // 현재 날짜 구하기
         LocalDate now = LocalDate.now();
@@ -43,7 +42,7 @@ public class MakeFile {
         String originalFileName = multipartFile.getOriginalFilename();
         String extension = originalFileName.substring(originalFileName.lastIndexOf(".")); //확장자 명 가져오기
 
-        String savedFileName = "Thumbnail-"+shoppingMallName+"-"+ UUID.randomUUID()+ extension;
+        String savedFileName = "Thumbnail"+"-"+ UUID.randomUUID()+extension;
 
         String saveFolderName = AllStaticStatus.saveImageFileRoot+formatedNow+"/";
 
@@ -60,7 +59,7 @@ public class MakeFile {
         }
 
 
-        return 1;
+        return saveFolderName.substring(saveFolderName.indexOf("Jang")) + savedFileName;
     }
 
 }

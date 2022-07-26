@@ -21,14 +21,16 @@ public class ShoppinMallModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    private String ShoppingMallName;
+    private String shoppingMallName;
+
+    private String shppingMallExplanation;
 
     @JoinColumn(name = "create_user")
     @OneToOne
     private UserModel userModel;
 
     // 사진 경로를 남길듯
-    @Column(length = 800)
+    @Column(length = 1000)
     private String thumnail;
 
     @CreationTimestamp
