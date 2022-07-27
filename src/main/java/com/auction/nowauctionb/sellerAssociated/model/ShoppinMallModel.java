@@ -31,7 +31,11 @@ public class ShoppinMallModel {
 
     // 사진 경로를 남길듯
     @Column(length = 1000)
-    private String thumnail;
+    private String thumnailUrlPath;
+
+    // 삭제를 위한 사진경로
+    @Column(length = 1000)
+    private String thumnailFilePath;
 
     @CreationTimestamp
     private Timestamp createShoppinMall;

@@ -7,17 +7,14 @@ import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepo
 import lombok.RequiredArgsConstructor;
 
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
+import java.util.Map;
+
 
 @RequiredArgsConstructor
 @Service
@@ -49,13 +46,17 @@ public class ShoppingMallService1 {
         }
 
         // 파일저장
-        String fileName = makeFile.makeFileImage(principalDetails.getUserModel(), multipartFile,request);
+        // 1. url 사진 경로
+        // 2. 컴퓨터 사진 파일 경로
+        Map<Integer,String> fileNames =makeFile.makeFileImage(principalDetails.getUserModel(), multipartFile,request);
+
 
         ShoppinMallModel shoppinMallModelSave =
                 ShoppinMallModel.builder()
                         .shoppingMallName(shoppingMallName)
                         .shppingMallExplanation(shoppingMallExplanation)
-                        .thumnail(fileName)
+                        .thumnailUrlPath(fileNames.get(1))
+                        .thumnailFilePath(fileNames.get(2))
                         .userModel(principalDetails.getUserModel())
                         .build();
 

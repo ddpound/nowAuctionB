@@ -9,9 +9,6 @@ import com.auction.nowauctionb.sellerAssociated.model.ShoppinMallModel;
 import com.auction.nowauctionb.sellerAssociated.repository.SellerCouponRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepositry;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,20 +65,26 @@ public class SellerService1 {
     public ShoppingMallFront checkShoppingMall(PrincipalDetails principalDetails){
         ShoppinMallModel shoppinMallModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
 
-        UserModel userModel = shoppinMallModel.getUserModel();
-        userModel.setPassword("");
+        if(shoppinMallModel !=null){
+            UserModel userModel = shoppinMallModel.getUserModel();
+            userModel.setPassword("");
 
-        // 프론트 반환할때 비밀번호가 나가지않게... 근데 다른 좋은방법을 생각해보자
-        ShoppingMallFront shoppingMallFront = ShoppingMallFront.builder()
-                .id(shoppinMallModel.getId())
-                .shoppingMallName(shoppinMallModel.getShoppingMallName())
-                .shppingMallExplanation(shoppinMallModel.getShppingMallExplanation())
-                .thumnail(shoppinMallModel.getThumnail())
-                .userModel(userModel)
-                .build();
+            // 프론트 반환할때 비밀번호가 나가지않게... 근데 다른 좋은방법을 생각해보자
+            ShoppingMallFront shoppingMallFront = ShoppingMallFront.builder()
+                    .id(shoppinMallModel.getId())
+                    .shoppingMallName(shoppinMallModel.getShoppingMallName())
+                    .shppingMallExplanation(shoppinMallModel.getShppingMallExplanation())
+                    .thumnail(shoppinMallModel.getThumnailUrlPath())
+                    .userModel(userModel)
+                    .build();
 
 
-        return shoppingMallFront;
+            return shoppingMallFront;
+        }else {
+            return null;
+        }
+
+
 
     }
 
