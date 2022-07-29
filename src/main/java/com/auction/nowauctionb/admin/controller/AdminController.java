@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -65,7 +66,24 @@ public class AdminController {
             HttpServletRequest request){
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
+
+
         return makeFile.makeTemporaryfiles(multipartFile,principalDetails.getUserModel(),request);
+    }
+
+    @PostMapping(value = "save-announcement-board", produces = "application/json")
+    public ResponseEntity saveAnnouncementBoard(@RequestBody Map<String,String> boardData,
+                                      Authentication authentication,
+                                      HttpServletRequest request){
+
+        PrincipalDetails principalDetails =(PrincipalDetails) authentication.getPrincipal();
+
+        System.out.println(boardData.get("title"));
+        System.out.println(boardData.get("content"));
+
+        adminService1.saveAnnouncementBoard(principalDetails.getUserModel().getUserId());
+
+        return new ResponseEntity(null, HttpStatus.OK);
     }
 
 

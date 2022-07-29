@@ -1,7 +1,9 @@
 package com.auction.nowauctionb.admin.service;
 
 
+import com.auction.nowauctionb.admin.repository.IntegrateBoardRepository;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
+import com.auction.nowauctionb.filesystem.MakeFile;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
 import com.auction.nowauctionb.sellerAssociated.frontmodel.SellerCouponFront;
@@ -30,7 +32,11 @@ public class AdminService1 {
 
     private final SellerCouponRepository sellerCouponRepository;
 
+    private final IntegrateBoardRepository integrateBoardRepository;
+
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    private final MakeFile makeFile;
 
     @Value("${jangadmin.secreyKey}")
     private String adminPassword;
@@ -138,6 +144,15 @@ public class AdminService1 {
         }
 
         return sellerCouponFrontsArray;
+    }
+
+    // 유저의 아이디이자 폴더 이름 가져온다는 뜻
+    @Transactional
+    public void saveAnnouncementBoard(int userAndBoardId){
+
+        makeFile.saveMoveImageFiles(userAndBoardId);
+        makeFile.deleteTemporary(userAndBoardId);
+
     }
 
 

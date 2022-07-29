@@ -25,8 +25,8 @@ public class WebConfig implements WebMvcConfigurer {
 
         if(AllStaticStatus.osName .contains("win")){
             log.info("Now Os Name is window");
-            AllStaticStatus.saveImageFileRoot =  "C:"+ File.separator+"Jang_SaveImage"+ File.separator;
-            AllStaticStatus.temporaryImageFiles = "C:"+ File.separator+"Temporary_files"+ File.separator;
+            AllStaticStatus.saveImageFileRoot =  "C:"+ File.separator+"Jang_SaveImage/";
+            AllStaticStatus.temporaryImageFiles = "C:"+ File.separator+"Temporary_files/";
         }else{
             log.info("Now Os Name is linux");
             AllStaticStatus.saveImageFileRoot = "/home/youseongjung/Templates/Jang_SaveImage/";

@@ -4,6 +4,7 @@ package com.auction.nowauctionb.filesystem;
 import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.google.gson.JsonObject;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -19,6 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Log4j2
 @Component
 public class MakeFile {
 
@@ -30,18 +33,24 @@ public class MakeFile {
 //    제목 파일 (제목,아님 썸네일 - UUID)
 //    유저아이디-(종류썸네일,제품)-UUID
 
-    // 해당것은 한개의 파일만 입력했을때
-    public Map<Integer,String> makeFileImage(UserModel userModel,
-                                MultipartFile multipartFile,
-                                HttpServletRequest request){
-
+    public String nowDate(){
         // 현재 날짜 구하기
         LocalDate now = LocalDate.now();
 
         // 포맷 정의
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
         // 포맷 적용
-        String formatedNow = now.format(formatter);
+
+        return now.format(formatter);
+    }
+
+
+    // 해당것은 한개의 파일만 입력했을때
+    public Map<Integer,String> makeFileImage(UserModel userModel,
+                                MultipartFile multipartFile,
+                                HttpServletRequest request){
+
+
 
 
         // 현재시간 + 작성자 + 쇼핑몰이름 + uuid
@@ -51,7 +60,7 @@ public class MakeFile {
 
         String savedFileName = "Thumbnail"+"-"+ UUID.randomUUID()+extension;
 
-        String saveFolderName = AllStaticStatus.saveImageFileRoot+formatedNow+"/";
+        String saveFolderName = AllStaticStatus.saveImageFileRoot+nowDate()+"/";
 
         File targetFile = new File(saveFolderName + savedFileName);
 
@@ -89,7 +98,9 @@ public class MakeFile {
                                          HttpServletRequest request){
 
         JsonObject jsonObject = new JsonObject();
-        String temporarySavePath = AllStaticStatus.temporaryImageFiles+File.separator+userModel.getUserId();
+        String temporarySavePath = AllStaticStatus.temporaryImageFiles+File.separator+userModel.getUserId()+File.separator;
+
+        String saveFolderName = AllStaticStatus.temporaryImageFiles;
 
         // 오리지널 파일 명에 붙어있는 확장자를 떼서 예) .jpeg .png 등만 떼서 다시 이름을 정해주는 작업
         String originalFileName = multipartFile.getOriginalFilename();	//오리지날 파일명
@@ -104,7 +115,11 @@ public class MakeFile {
         try {
             InputStream fileStream = multipartFile.getInputStream();
             FileUtils.copyInputStreamToFile(fileStream, targetFile);
-            jsonObject.addProperty("url", mainurl+AllStaticStatus.temporaryImageFiles+File.separator+userModel.getUserId());
+            jsonObject.addProperty("url", mainurl
+                    +saveFolderName.substring(saveFolderName.indexOf("Temporary"))
+                    +userModel.getUserId()
+                    +"/"
+                    +saveFileName);
             jsonObject.addProperty("responseCode", "success");
             multipartFile.getInputStream().close();
 
@@ -115,5 +130,81 @@ public class MakeFile {
         }
 
         return jsonObject;
+    }
+
+    // 원하는 파일들을 모두 Save파일에 옮기고
+
+    public void saveMoveImageFiles(int fileId){
+
+        String temporary = AllStaticStatus.temporaryImageFiles+fileId;
+
+        // 현재 시간 가져오는 함수
+        String saveFolderRoot = AllStaticStatus.saveImageFileRoot+nowDate()+"/";
+
+        File dir = new File(temporary);
+        File[] files = dir.listFiles();
+
+        for(File f : files) {
+
+            // 파일 이름이 "종류"-"filename"
+            // 이렇게 지정됨
+            String SearchfileName = Integer.toString(fileId);
+
+            if(f.isFile() && f.getName().startsWith(SearchfileName)) {
+                // 이름 변경 -> 파일 이동 -> 오리지널 파일로 이동 url 는 그럼?
+                // DB 이름도 변경해야함 Content 검사해서 변경해서 넣어주기
+                String changeFileName = saveFolderRoot + f.getName();
+
+                // 저장할 파일의 경로 (걍로와 이름)
+                File targetFile = new File(changeFileName);
+                try {
+                    FileInputStream fileInputStream = new FileInputStream(f); // 저장할 파일
+                    FileUtils.copyInputStreamToFile(fileInputStream, targetFile); //저장
+
+                    // 다하면 꼭 닫아줘야하는 의무가 있다
+                    fileInputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+        }
+
+    }
+
+
+
+    // 임시파일인 temporary는 전부 삭제하는 과정
+    // 임시파일은 유저 ID를 이용해서 파일을 저장하니깐 찾아내야함
+    public void deleteTemporary(int fileId){
+
+        // 임시파일 경로에 해당 아이디의 파일이 있음
+        String deletePath = AllStaticStatus.temporaryImageFiles + File.separator + fileId;
+
+        // 결로지정
+        File folder = new File(deletePath);
+
+        try {
+            while(folder.exists()) {
+                File[] folder_list = folder.listFiles(); //파일리스트 얻어오기
+                if(folder_list != null){
+                    for (int j = 0; j < folder_list.length; j++) {
+                        folder_list[j].delete(); //파일 삭제
+                    }
+
+                    if(folder_list.length == 0 && folder.isDirectory()){
+                        folder.delete(); //대상폴더 삭제
+                    }
+                }else{
+                    log.info("imageFolder and file is null");
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
     }
 }
