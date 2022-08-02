@@ -33,11 +33,9 @@ public class IntegrateBoardModel {
     @Lob
     private String Content;
 
-    private BoardCategory boardCategory;
-
     // 카테고리
     // {공지, 그외 관리자가 사용할 보드 통합}
-    private String Category;
+    private AdminBoardCategory adminBoardCategory;
 
     @CreationTimestamp
     private Timestamp createDate;

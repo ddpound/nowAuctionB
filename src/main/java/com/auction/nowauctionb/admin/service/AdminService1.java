@@ -1,7 +1,10 @@
 package com.auction.nowauctionb.admin.service;
 
 
+import com.auction.nowauctionb.admin.model.AdminBoardCategory;
+import com.auction.nowauctionb.admin.model.IntegrateBoardModel;
 import com.auction.nowauctionb.admin.repository.IntegrateBoardRepository;
+import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
@@ -18,6 +21,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -147,13 +151,49 @@ public class AdminService1 {
     }
 
     // 유저의 아이디이자 폴더 이름 가져온다는 뜻
-    @Transactional
-    public void saveAnnouncementBoard(int userAndBoardId){
+    @Transactional(readOnly = true)
+    public void saveAnnouncementBoardImageFIle(int userAndBoardId){
 
+        // 파일 관련 부분
         makeFile.saveMoveImageFiles(userAndBoardId);
         makeFile.deleteTemporary(userAndBoardId);
 
     }
+    @Transactional
+    public void saveAnnouncementBoard(IntegrateBoardModel boardModel, HttpServletRequest request){
 
+        // 배포때는 수정해야할 듯
+        String mainurl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/";
+
+        // http://localhost:5000/Temporrary_files/1/ 까지의 파일경로를 변경해주자
+        String changeTargetFolderPath
+                = mainurl+AllStaticStatus.temporaryImageFiles.substring(
+                        AllStaticStatus.temporaryImageFiles
+                                .indexOf("Temporary"))
+                + boardModel.getUserModel().getUserId()+"/";
+
+        // 앞의 C나 home 루트를 제외시킴
+        String changeFolerPath = mainurl+AllStaticStatus.saveImageFileRoot
+                .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang"))+"/"+makeFile.nowDate()+"/";
+
+        // 바꿔줘야함 문자열 받은걸
+        String changeBoardContent = boardModel.getContent().replace(changeTargetFolderPath,changeFolerPath);
+        boardModel.setContent(changeBoardContent);
+
+        integrateBoardRepository.save(boardModel);
+    }
+
+    // 카테고리별로 가져올수 있는 통합 메소드
+    @Transactional(readOnly = true)
+    public List<IntegrateBoardModel> findAllAndCategoryBoard(AdminBoardCategory adminBoardCategory){
+
+        return integrateBoardRepository.findAllByBoardCategory(adminBoardCategory);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<IntegrateBoardModel> findAnnouncementBoard(int boardId){
+
+        return integrateBoardRepository.findById(boardId);
+    }
 
 }

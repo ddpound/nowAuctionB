@@ -1,11 +1,9 @@
 package com.auction.nowauctionb.admin.model;
 
-import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-public enum BoardCategory {
+public enum AdminBoardCategory {
     Announcemnet; // 공지
 
 }

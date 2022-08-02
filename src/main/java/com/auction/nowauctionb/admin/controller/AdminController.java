@@ -1,10 +1,10 @@
 package com.auction.nowauctionb.admin.controller;
 
+import com.auction.nowauctionb.admin.model.AdminBoardCategory;
+import com.auction.nowauctionb.admin.model.IntegrateBoardModel;
 import com.auction.nowauctionb.admin.service.AdminService1;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
-import com.auction.nowauctionb.sellerAssociated.model.SellerCoupon;
-import com.auction.nowauctionb.sellerAssociated.repository.SellerCouponRepository;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -77,13 +76,24 @@ public class AdminController {
                                       HttpServletRequest request){
 
         PrincipalDetails principalDetails =(PrincipalDetails) authentication.getPrincipal();
-
+        // 세이브 서비스 붙여주기
         System.out.println(boardData.get("title"));
         System.out.println(boardData.get("content"));
 
-        adminService1.saveAnnouncementBoard(principalDetails.getUserModel().getUserId());
 
-        return new ResponseEntity(null, HttpStatus.OK);
+        adminService1.saveAnnouncementBoardImageFIle(principalDetails.getUserModel().getUserId());
+        adminService1.saveAnnouncementBoard(
+                IntegrateBoardModel.builder()
+                        .title(boardData.get("title"))
+                        .Content(boardData.get("content"))
+                        .userModel(principalDetails.getUserModel())
+                        .adminBoardCategory(AdminBoardCategory.Announcemnet)
+                        .build(),
+                request
+        );
+
+
+        return new ResponseEntity<>("OK",HttpStatus.OK);
     }
 
 
