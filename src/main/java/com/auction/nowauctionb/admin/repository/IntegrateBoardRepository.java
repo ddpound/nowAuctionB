@@ -9,7 +9,7 @@ import java.util.List;
 public interface IntegrateBoardRepository extends JpaRepository<IntegrateBoardModel,Integer> {
 
 
-    List<IntegrateBoardModel> findAllByBoardCategory(AdminBoardCategory adminBoardCategory);
+    List<IntegrateBoardModel> findAllByAdminBoardCategory(AdminBoardCategory adminBoardCategory);
 
 
 }

@@ -174,7 +174,7 @@ public class AdminService1 {
 
         // 앞의 C나 home 루트를 제외시킴
         String changeFolerPath = mainurl+AllStaticStatus.saveImageFileRoot
-                .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang"))+"/"+makeFile.nowDate()+"/";
+                .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang"))+makeFile.nowDate()+"/";
 
         // 바꿔줘야함 문자열 받은걸
         String changeBoardContent = boardModel.getContent().replace(changeTargetFolderPath,changeFolerPath);
@@ -187,13 +187,24 @@ public class AdminService1 {
     @Transactional(readOnly = true)
     public List<IntegrateBoardModel> findAllAndCategoryBoard(AdminBoardCategory adminBoardCategory){
 
-        return integrateBoardRepository.findAllByBoardCategory(adminBoardCategory);
+        ArrayList<IntegrateBoardModel> arrayList = new ArrayList<>();
+
+        for (IntegrateBoardModel intergrateBoard:integrateBoardRepository.findAllByAdminBoardCategory(adminBoardCategory)
+             ) {
+            intergrateBoard.getUserModel().setPassword("");
+            arrayList.add(intergrateBoard);
+        }
+
+        return arrayList;
     }
 
     @Transactional(readOnly = true)
     public Optional<IntegrateBoardModel> findAnnouncementBoard(int boardId){
 
-        return integrateBoardRepository.findById(boardId);
+        Optional<IntegrateBoardModel> integrateBoardModel =integrateBoardRepository.findById(boardId);
+
+        integrateBoardModel.get().getUserModel().setPassword("");
+        return integrateBoardModel;
     }
 
 }
