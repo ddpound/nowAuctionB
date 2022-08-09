@@ -68,5 +68,44 @@ public class SellerController1 {
         }
     }
 
+    @PostMapping("modify-shopping-mall")
+    public ResponseEntity modifyMyShoppingMall(@RequestParam("shoppingMallName") String shoppingmallName,
+                                               @RequestParam(value = "thumbnail",required = false) MultipartFile multipartFile,
+                                               @RequestParam(value = "thumbnail2",required = false) String urlFilePath,
+                                               @RequestParam("explantion") String shoppingMallExplanation,
+                                               Authentication authentication,
+                                               HttpServletRequest request) throws IOException {
+
+        int resultNum = shoppingMallService1.modifyShoppingMall(authentication ,
+                multipartFile,
+                shoppingmallName,
+                shoppingMallExplanation,
+                urlFilePath,
+                request);
+
+        if(resultNum == 1){
+            return new ResponseEntity("", HttpStatus.OK);
+        } else if (resultNum == -2) {
+            // 중복된 쇼핑몰 이름
+            return new ResponseEntity("Already-ShoppingMall-Name", HttpStatus.OK);
+        } else if (resultNum == -3) {
+            // 중복된 쇼핑몰 이름
+            return new ResponseEntity("user-have-not-ShoppingMall", HttpStatus.OK);
+        } else {
+            return new ResponseEntity("", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping(value = "register-product")
+    public ResponseEntity registerProduct(@RequestParam("productName") String productName,
+                                          @RequestParam("productPrice") String productPrice,
+                                          Authentication authentication,
+                                          HttpServletRequest request){
+
+        int resultNum = shoppingMallService1.saveProduct(authentication,productName ,productPrice,request);
+
+        return new ResponseEntity("good-product", HttpStatus.OK);
+    }
+
 
 }

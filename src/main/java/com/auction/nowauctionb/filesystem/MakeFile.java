@@ -29,7 +29,7 @@ public class MakeFile {
 //    유저이름, 날짜
 //    동일한 날짜가있을시, 한달 으로 두는게 좋을듯
 //    예
-//    날짜 파일 (년도-월-카테고리)
+//    날짜 폴더 (년도-월/날짜)
 //    제목 파일 (제목,아님 썸네일 - UUID)
 //    유저아이디-(종류썸네일,제품)-UUID
 
@@ -38,7 +38,20 @@ public class MakeFile {
         LocalDate now = LocalDate.now();
 
         // 포맷 정의
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
+        DateTimeFormatter formatter1 = DateTimeFormatter.ofPattern("yyyy-MM");
+        DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("dd");
+        // 포맷 적용
+
+        return now.format(formatter1)+"/"+now.format(formatter2);
+    }
+
+    // 날짜만 따로
+    public String nowDateDay(){
+        // 현재 날짜 구하기
+        LocalDate now = LocalDate.now();
+
+        // 포맷 정의
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd");
         // 포맷 적용
 
         return now.format(formatter);
@@ -47,18 +60,15 @@ public class MakeFile {
 
     // 해당것은 한개의 파일만 입력했을때
     public Map<Integer,String> makeFileImage(UserModel userModel,
-                                MultipartFile multipartFile,
-                                HttpServletRequest request){
-
-
-
+                                             MultipartFile multipartFile,
+                                             HttpServletRequest request){
 
         // 현재시간 + 작성자 + 쇼핑몰이름 + uuid
 
         String originalFileName = multipartFile.getOriginalFilename();
         String extension = originalFileName.substring(originalFileName.lastIndexOf(".")); //확장자 명 가져오기
 
-        String savedFileName = "Thumbnail"+"-"+ UUID.randomUUID()+extension;
+        String savedFileName = userModel.getUserId()+"-"+ UUID.randomUUID()+extension;
 
         String saveFolderName = AllStaticStatus.saveImageFileRoot+nowDate()+"/";
 
@@ -144,32 +154,41 @@ public class MakeFile {
         File dir = new File(temporary);
         File[] files = dir.listFiles();
 
-        for(File f : files) {
+        if(files != null){
+            for(File f : files) {
 
-            // 파일 이름이 "종류"-"filename"
-            // 이렇게 지정됨
-            String SearchfileName = Integer.toString(fileId);
+                // 파일 이름이 "종류"-"filename"
+                // 이렇게 지정됨
 
-            if(f.isFile() && f.getName().startsWith(SearchfileName)) {
-                // 이름 변경 -> 파일 이동 -> 오리지널 파일로 이동 url 는 그럼?
-                // DB 이름도 변경해야함 Content 검사해서 변경해서 넣어주기
-                String changeFileName = saveFolderRoot + f.getName();
+                String SearchfileName = Integer.toString(fileId);
 
-                // 저장할 파일의 경로 (걍로와 이름)
-                File targetFile = new File(changeFileName);
-                try {
-                    FileInputStream fileInputStream = new FileInputStream(f); // 저장할 파일
-                    FileUtils.copyInputStreamToFile(fileInputStream, targetFile); //저장
+                if(f.isFile() && f.getName().startsWith(SearchfileName)) {
+                    // 이름 변경 -> 파일 이동 -> 오리지널 파일로 이동 url 는 그럼?
+                    // DB 이름도 변경해야함 Content 검사해서 변경해서 넣어주기
+                    String changeFileName = saveFolderRoot + f.getName();
 
-                    // 다하면 꼭 닫아줘야하는 의무가 있다
-                    fileInputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    // 저장할 파일의 경로 (걍로와 이름)
+                    File targetFile = new File(changeFileName);
+                    try {
+                        FileInputStream fileInputStream = new FileInputStream(f); // 저장할 파일
+                        FileUtils.copyInputStreamToFile(fileInputStream, targetFile); //저장
+
+                        // 다하면 꼭 닫아줘야하는 의무가 있다
+                        fileInputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                 }
 
             }
 
+
+        }else{
+            log.info("not image");
         }
+
+
 
     }
 
@@ -207,4 +226,25 @@ public class MakeFile {
 
 
     }
+
+    // 해당 경로로 이미지 파일 하나만 삭제
+    // 보통 쇼핑몰 썸네일 삭제를 위해 만들어둔 메소드 입니다.
+    public void filePathImageDelete(String filePath){
+
+        File file = new File(filePath);
+
+        // exists 존재하다.
+        if( file.exists() ){
+            if(file.delete()){
+                log.info("delete file");
+            }else{
+                log.info("delete fail");
+            }
+        }else{
+            log.info("This file does not exist");
+        }
+
+    }
+
+
 }

@@ -28,7 +28,6 @@ public class UserController1 {
         try{
             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
-            log.info("return / info : " + principalDetails);
             //return userService1.findUserNameFrontUserModel(principalDetails.getUsername());
             return new ResponseEntity<>(userService1.findUserNameFrontUserModel(principalDetails.getUsername()),HttpStatus.OK);
         }catch (NullPointerException e){

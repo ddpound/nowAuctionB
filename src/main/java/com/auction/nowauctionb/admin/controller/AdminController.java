@@ -76,10 +76,9 @@ public class AdminController {
                                       HttpServletRequest request){
 
         PrincipalDetails principalDetails =(PrincipalDetails) authentication.getPrincipal();
-        // 세이브 서비스 붙여주기
-        System.out.println(boardData.get("title"));
-        System.out.println(boardData.get("content"));
 
+
+        // 세이브 서비스 붙여주기
 
         adminService1.saveAnnouncementBoardImageFIle(principalDetails.getUserModel().getUserId());
         adminService1.saveAnnouncementBoard(
