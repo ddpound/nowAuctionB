@@ -60,8 +60,8 @@ public class ShoppingMallService1 {
                 ShoppinMallModel.builder()
                         .shoppingMallName(shoppingMallName)
                         .shppingMallExplanation(shoppingMallExplanation)
-                        .thumnailUrlPath(fileNames.get(1))
-                        .thumnailFilePath(fileNames.get(2))
+                        .thumbnailUrlPath(fileNames.get(1))
+                        .thumbnailFilePath(fileNames.get(2))
                         .userModel(principalDetails.getUserModel())
                         .build();
 
@@ -104,13 +104,13 @@ public class ShoppingMallService1 {
         if(urlFilePath == null){
             // 새로운 파일을 저장하기 앞서 먼저 삭제해야함 해당 사진은
             // 파일 경로를 불러와 그대로 삭제
-            makeFile.filePathImageDelete(shoppinMallModel1ByUserModel.getThumnailFilePath());
+            makeFile.filePathImageDelete(shoppinMallModel1ByUserModel.getThumbnailFilePath());
             // 새로운 파일저장 입니다.
             // 1. url 사진 경로
             // 2. 컴퓨터 사진 파일 경로
             Map<Integer,String> fileNames =makeFile.makeFileImage(principalDetails.getUserModel(), multipartFile,request);
-            shoppinMallModel1ByUserModel.setThumnailUrlPath(fileNames.get(1));
-            shoppinMallModel1ByUserModel.setThumnailFilePath(fileNames.get(2));
+            shoppinMallModel1ByUserModel.setThumbnailUrlPath(fileNames.get(1));
+            shoppinMallModel1ByUserModel.setThumbnailFilePath(fileNames.get(2));
         }
 
         // 아니면 냅둔다
@@ -146,6 +146,15 @@ public class ShoppingMallService1 {
     @Transactional(readOnly = true)
     public List<ShoppinMallModel> findAllShoppingMallList(){
 
-        return shoppingMallModelRepositry.findAll();
+        List<ShoppinMallModel> findShoppingMallModel = shoppingMallModelRepositry.findAll();
+
+
+        if(findShoppingMallModel.size() > 0){
+            for (int i=0 ; i < findShoppingMallModel.size(); i++) {
+                findShoppingMallModel.get(i).getUserModel().setPassword("");
+            }
+        }
+
+        return findShoppingMallModel;
     }
 }

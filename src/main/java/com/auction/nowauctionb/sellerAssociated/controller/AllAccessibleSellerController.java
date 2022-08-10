@@ -2,6 +2,7 @@ package com.auction.nowauctionb.sellerAssociated.controller;
 
 
 import com.auction.nowauctionb.admin.model.IntegrateBoardModel;
+import com.auction.nowauctionb.sellerAssociated.jpamappinginterface.ShoppingMallMapping;
 import com.auction.nowauctionb.sellerAssociated.model.ShoppinMallModel;
 import com.auction.nowauctionb.sellerAssociated.service.ShoppingMallService1;
 import lombok.RequiredArgsConstructor;

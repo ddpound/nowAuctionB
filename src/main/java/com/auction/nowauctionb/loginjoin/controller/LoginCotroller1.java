@@ -96,11 +96,7 @@ public class LoginCotroller1 {
     @PostMapping(value = "join/googletoken")
     public ResponseEntity joinController(HttpServletRequest request){
 
-
-
-
         tokenJoinService.googleTokenJoingetHeader(request);
-
 
         return new ResponseEntity<>( "Your membership registration is complete.", HttpStatus.OK);
     }

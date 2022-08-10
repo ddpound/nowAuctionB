@@ -2,6 +2,7 @@ package com.auction.nowauctionb.loginjoin.model;
 
 
 import com.auction.nowauctionb.configpack.jwtconfig.model.JwtSuperintendModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +34,7 @@ public class UserModel {
     private String username;
 
     // 토큰값을 넣을까 고민중
+    @JsonIgnore
     private String password;
 
     // 어디 로그인api를 사용했는지도 구분해놔야함

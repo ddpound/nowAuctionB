@@ -74,7 +74,7 @@ public class SellerService1 {
                     .id(shoppinMallModel.getId())
                     .shoppingMallName(shoppinMallModel.getShoppingMallName())
                     .shppingMallExplanation(shoppinMallModel.getShppingMallExplanation())
-                    .thumnail(shoppinMallModel.getThumnailUrlPath())
+                    .thumnail(shoppinMallModel.getThumbnailUrlPath())
                     .userModel(userModel)
                     .build();
 
