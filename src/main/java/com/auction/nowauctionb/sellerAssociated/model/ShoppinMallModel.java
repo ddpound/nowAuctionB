@@ -23,7 +23,7 @@ public class ShoppinMallModel {
 
     private String shoppingMallName;
 
-    private String shppingMallExplanation;
+    private String shoppingMallExplanation;
 
     @JoinColumn(name = "create_user")
     @OneToOne
@@ -38,9 +38,9 @@ public class ShoppinMallModel {
     private String thumbnailFilePath;
 
     @CreationTimestamp
-    private Timestamp createShoppinMall;
+    private Timestamp createShoppingMall;
 
     @UpdateTimestamp
-    private Timestamp modifyShoppinMall;
+    private Timestamp modifyShoppingMall;
 
 }

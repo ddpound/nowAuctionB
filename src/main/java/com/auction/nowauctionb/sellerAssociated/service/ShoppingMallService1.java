@@ -59,7 +59,7 @@ public class ShoppingMallService1 {
         ShoppinMallModel shoppinMallModelSave =
                 ShoppinMallModel.builder()
                         .shoppingMallName(shoppingMallName)
-                        .shppingMallExplanation(shoppingMallExplanation)
+                        .shoppingMallExplanation(shoppingMallExplanation)
                         .thumbnailUrlPath(fileNames.get(1))
                         .thumbnailFilePath(fileNames.get(2))
                         .userModel(principalDetails.getUserModel())
@@ -119,7 +119,7 @@ public class ShoppingMallService1 {
 
         // 더티체킹
         shoppinMallModel1ByUserModel.setShoppingMallName(shoppingMallName);
-        shoppinMallModel1ByUserModel.setShppingMallExplanation(shoppingMallExplanation);
+        shoppinMallModel1ByUserModel.setShoppingMallExplanation(shoppingMallExplanation);
 
 
 

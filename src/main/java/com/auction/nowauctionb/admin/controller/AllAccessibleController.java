@@ -25,13 +25,11 @@ public class AllAccessibleController {
 
     private final AdminService1 adminService1;
 
-
     @GetMapping(value = "find-announcement-board/{boardId}")
     public  ResponseEntity<Optional<IntegrateBoardModel>> findAnnuncementBoard(
             HttpServletRequest request,
             @PathVariable int boardId
     ){
-
         return new ResponseEntity<>(adminService1.findAnnouncementBoard(boardId), HttpStatus.OK);
     }
 
@@ -39,7 +37,6 @@ public class AllAccessibleController {
     public ResponseEntity<List<IntegrateBoardModel>> findAllAnnouncementBoard(
             HttpServletRequest request
     ){
-
 
         return new ResponseEntity<>(adminService1.findAllAndCategoryBoard(AdminBoardCategory.Announcemnet), HttpStatus.OK);
     }

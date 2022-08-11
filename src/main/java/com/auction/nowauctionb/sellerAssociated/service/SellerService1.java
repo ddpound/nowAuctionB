@@ -73,7 +73,7 @@ public class SellerService1 {
             ShoppingMallFront shoppingMallFront = ShoppingMallFront.builder()
                     .id(shoppinMallModel.getId())
                     .shoppingMallName(shoppinMallModel.getShoppingMallName())
-                    .shppingMallExplanation(shoppinMallModel.getShppingMallExplanation())
+                    .shppingMallExplanation(shoppinMallModel.getShoppingMallExplanation())
                     .thumnail(shoppinMallModel.getThumbnailUrlPath())
                     .userModel(userModel)
                     .build();

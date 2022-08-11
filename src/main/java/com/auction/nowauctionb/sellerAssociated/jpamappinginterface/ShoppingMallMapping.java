@@ -9,11 +9,11 @@ import java.sql.Timestamp;
 public interface ShoppingMallMapping {
     int getId();
     String getShoppingMallName();
-    String getShppingMallExplanation();
+    String getShoppingMallExplanation();
     String getThumbnailUrlPath();
     String getThumbnailFilePath();
-    Timestamp getCreateShoppinMall();
-    Timestamp getModifyShoppinMall();
+    Timestamp getCreateShoppingMall();
+    Timestamp getModifyShoppingMall();
 
 
     Whatever getUserModel();

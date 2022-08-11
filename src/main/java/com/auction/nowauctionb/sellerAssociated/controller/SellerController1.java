@@ -96,6 +96,7 @@ public class SellerController1 {
         }
     }
 
+    // 제품등록
     @PostMapping(value = "register-product")
     public ResponseEntity registerProduct(@RequestParam("productName") String productName,
                                           @RequestParam("productPrice") String productPrice,
