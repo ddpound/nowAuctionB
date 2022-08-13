@@ -143,8 +143,9 @@ public class MakeFile {
     }
 
     // 원하는 파일들을 모두 Save파일에 옮기고
-
-    public void saveMoveImageFiles(int fileId){
+    // 컨텐츠도 받아와야함 ,
+    // content 에 해당 애가 검색안된다면 옮기지 말아야함
+    public void saveMoveImageFiles(int fileId, String content){
 
         String temporary = AllStaticStatus.temporaryImageFiles+fileId;
 
@@ -162,27 +163,33 @@ public class MakeFile {
 
                 String SearchfileName = Integer.toString(fileId);
 
+                // 아이디로 시작하는 모든 사진들
                 if(f.isFile() && f.getName().startsWith(SearchfileName)) {
-                    // 이름 변경 -> 파일 이동 -> 오리지널 파일로 이동 url 는 그럼?
-                    // DB 이름도 변경해야함 Content 검사해서 변경해서 넣어주기
-                    String changeFileName = saveFolderRoot + f.getName();
 
-                    // 저장할 파일의 경로 (걍로와 이름)
-                    File targetFile = new File(changeFileName);
-                    try {
-                        FileInputStream fileInputStream = new FileInputStream(f); // 저장할 파일
-                        FileUtils.copyInputStreamToFile(fileInputStream, targetFile); //저장
+                    // 여기서 중요한 부분 content안에 해당 사진이 있는지를 검사
+                    // 있을 때만 이동, 그럼 나머지는 삭제되고 본파일에는 게시판에있는것만 옮겨짐
+                    if(content.contains(f.getName())){
+                        // 이름 변경 -> 파일 이동 -> 오리지널 파일로 이동 url 는 그럼?
+                        // DB 이름도 변경해야함 Content 검사해서 변경해서 넣어주기
+                        String changeFileName = saveFolderRoot + f.getName();
 
-                        // 다하면 꼭 닫아줘야하는 의무가 있다
-                        fileInputStream.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        // 저장할 파일의 경로 (걍로와 이름)
+                        File targetFile = new File(changeFileName);
+                        try {
+                            FileInputStream fileInputStream = new FileInputStream(f); // 저장할 파일
+                            FileUtils.copyInputStreamToFile(fileInputStream, targetFile); //저장
+
+                            // 다하면 꼭 닫아줘야하는 의무가 있다
+                            fileInputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
+
 
                 }
 
             }
-
 
         }else{
             log.info("not image");
@@ -243,6 +250,13 @@ public class MakeFile {
         }else{
             log.info("This file does not exist");
         }
+
+    }
+
+    // 이게 검사부분일듯 이름 일치하는것
+    // 이름 일치할때만 옮기고 나머지는 삭제하는 과정이 필요함
+    public void fileSearchAndDelete(){
+
 
     }
 

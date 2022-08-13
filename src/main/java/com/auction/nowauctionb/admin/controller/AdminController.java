@@ -66,7 +66,6 @@ public class AdminController {
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
 
-
         return makeFile.makeTemporaryfiles(multipartFile,principalDetails.getUserModel(),request);
     }
 
@@ -80,7 +79,7 @@ public class AdminController {
 
         // 세이브 서비스 붙여주기
 
-        adminService1.saveAnnouncementBoardImageFIle(principalDetails.getUserModel().getUserId());
+        adminService1.saveAnnouncementBoardImageFIle(principalDetails.getUserModel().getUserId(),boardData.get("content"));
         adminService1.saveAnnouncementBoard(
                 IntegrateBoardModel.builder()
                         .title(boardData.get("title"))

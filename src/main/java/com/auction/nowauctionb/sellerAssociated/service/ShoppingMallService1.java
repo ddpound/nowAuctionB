@@ -1,5 +1,6 @@
 package com.auction.nowauctionb.sellerAssociated.service;
 
+import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
 import com.auction.nowauctionb.sellerAssociated.model.ProductModel;
@@ -156,5 +157,37 @@ public class ShoppingMallService1 {
         }
 
         return findShoppingMallModel;
+    }
+
+    @Transactional(readOnly = true)
+    public void saveProductImageFIle(int userproductdId,String content){
+
+        // 파일 관련 부분
+        makeFile.saveMoveImageFiles(userproductdId, content);
+        makeFile.deleteTemporary(userproductdId);
+
+    }
+    @Transactional
+    public void saveProduct(ProductModel productModel, HttpServletRequest request){
+
+        // 배포때는 수정해야할 듯
+        String mainurl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/";
+
+        // http://localhost:5000/Temporrary_files/1/ 까지의 파일경로를 변경해주자
+        String changeTargetFolderPath
+                = mainurl+ AllStaticStatus.temporaryImageFiles.substring(
+                AllStaticStatus.temporaryImageFiles
+                        .indexOf("Temporary"))
+                + productModel.getUserModel().getUserId()+"/";
+
+        // 앞의 C나 home 루트를 제외시킴
+        String changeFolerPath = mainurl+AllStaticStatus.saveImageFileRoot
+                .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang"))+makeFile.nowDate()+"/";
+
+        // 바꿔줘야함 문자열 받은걸
+        String changeBoardContent = productModel.getContent().replace(changeTargetFolderPath,changeFolerPath);
+        productModel.setContent(changeBoardContent);
+
+        productModelRepository.save(productModel);
     }
 }

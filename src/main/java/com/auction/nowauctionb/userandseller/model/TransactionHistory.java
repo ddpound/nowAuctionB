@@ -34,14 +34,18 @@ public class TransactionHistory {
     @JoinColumn(name = "buyer")
     private UserModel buyer;
 
-
     // 이 테이블 안에는 한개의 제품만을 나타낸다
     @ManyToOne
     @JoinColumn(name = "buyproduct")
-    ProductModel buyproduct;
+    ProductModel buyProduct;
 
+    // 거래가 완료됐는지 안됐는지 파악
+    private boolean dealCompleted;
 
-    // 거래 등록 날짜
+    // 거래완료 날짜
+    private Timestamp dealCompleteDate;
+
+    // 거래 등록, 신청날짜
     @CreationTimestamp
     private Timestamp transactionregisterDate;
 

@@ -1,17 +1,24 @@
 package com.auction.nowauctionb.sellerAssociated.service;
 
+import com.auction.nowauctionb.admin.model.IntegrateBoardModel;
+import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
+import com.auction.nowauctionb.filesystem.MakeFile;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
 import com.auction.nowauctionb.sellerAssociated.frontmodel.ShoppingMallFront;
+import com.auction.nowauctionb.sellerAssociated.model.ProductModel;
 import com.auction.nowauctionb.sellerAssociated.model.SellerCoupon;
 import com.auction.nowauctionb.sellerAssociated.model.ShoppinMallModel;
+import com.auction.nowauctionb.sellerAssociated.repository.ProductModelRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.SellerCouponRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepositry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.http.HttpServletRequest;
 
 
 @RequiredArgsConstructor
@@ -24,6 +31,10 @@ public class SellerService1 {
     private final UserModelRepository userModelRepository;
 
     private final ShoppingMallModelRepositry shoppingMallModelRepositry;
+
+
+
+    private final MakeFile makeFile;
 
     @Transactional
     public int sellerRegister(Authentication authentication, String id, String code){
@@ -83,8 +94,6 @@ public class SellerService1 {
         }else {
             return null;
         }
-
-
 
     }
 

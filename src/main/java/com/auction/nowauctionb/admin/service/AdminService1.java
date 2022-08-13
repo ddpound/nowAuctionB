@@ -46,14 +46,13 @@ public class AdminService1 {
     private String adminPassword;
 
 
-
     //체크 필터에서 가져온 authentication 값을 디비에 넣고 비밀번호도 받아와야함
     @Transactional
-    public int giveAdmin(Authentication authentication,Map<String,Object> password){
+    public int giveAdmin(Authentication authentication, Map<String, Object> password) {
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
         //저장해둔 비밀번호가 같다면
-        if(adminPassword.equals(password.get("password"))){
+        if (adminPassword.equals(password.get("password"))) {
             //  db에서 세팅을 바꿔주자
 
             // 영속성 , 더티체킹
@@ -61,7 +60,7 @@ public class AdminService1 {
             userModel.setRoles("ROLE_USER,ROLE_SELLER,ROLE_ADMIN");
             return 1;
 
-        }else{
+        } else {
 
             return -1;
         }
@@ -72,14 +71,14 @@ public class AdminService1 {
 
     // DB에 판매자 쿠폰 등록을 만들어주는 서비스
     @Transactional
-    public int makeCoupon(String num){
+    public int makeCoupon(String num) {
 
         int length = 15;
         boolean useLetters = true;
         boolean useNumbers = true;
 
 
-        if(num == null){
+        if (num == null) {
             num = "1";
         }
 
@@ -87,7 +86,7 @@ public class AdminService1 {
 
         List<SellerCoupon> listSeller = new ArrayList<>();
 
-        for (int i = 0; i < newNum ; i++) {
+        for (int i = 0; i < newNum; i++) {
             String generatedString = RandomStringUtils.random(length, useLetters, useNumbers);
 
 
@@ -102,12 +101,12 @@ public class AdminService1 {
 
     // 삭제할 때 유저 권환도 취소해야함
     @Transactional
-    public int deleteCoupon(int id){
+    public int deleteCoupon(int id) {
 
         // 영속화
         Optional<SellerCoupon> sellerCoupon = sellerCouponRepository.findById(id);
 
-        if(sellerCoupon.get().getUserModel() != null ){
+        if (sellerCoupon.get().getUserModel() != null) {
             // 더티체킹
             sellerCoupon.get().getUserModel().setRoles("ROLE_USER");
         }
@@ -120,16 +119,16 @@ public class AdminService1 {
 
     // 따로 담아서 줘야함
     @Transactional(readOnly = true)
-    public List<SellerCouponFront> findAllCoupon(){
+    public List<SellerCouponFront> findAllCoupon() {
 
         List<SellerCoupon> resultCouponlist = sellerCouponRepository.findAll();
 
         ArrayList<SellerCouponFront> sellerCouponFrontsArray = new ArrayList<>();
 
-        
+
         for (SellerCoupon list : resultCouponlist
-             ) {
-            if(list != null && list.getUserModel() != null){
+        ) {
+            if (list != null && list.getUserModel() != null) {
                 sellerCouponFrontsArray.add(SellerCouponFront
                         .builder()
                         .id(list.getId())
@@ -137,7 +136,7 @@ public class AdminService1 {
                         .userId(list.getUserModel().getUserId())
                         .userName(list.getUserModel().getUsername())
                         .build());
-            }else if(list != null){
+            } else if (list != null) {
                 sellerCouponFrontsArray.add(SellerCouponFront
                         .builder()
                         .id(list.getId())
@@ -152,32 +151,33 @@ public class AdminService1 {
 
     // 유저의 아이디이자 폴더 이름 가져온다는 뜻
     @Transactional(readOnly = true)
-    public void saveAnnouncementBoardImageFIle(int userAndBoardId){
+    public void saveAnnouncementBoardImageFIle(int userAndBoardId, String content) {
 
         // 파일 관련 부분
-        makeFile.saveMoveImageFiles(userAndBoardId);
+        makeFile.saveMoveImageFiles(userAndBoardId, content);
         makeFile.deleteTemporary(userAndBoardId);
 
     }
+
     @Transactional
-    public void saveAnnouncementBoard(IntegrateBoardModel boardModel, HttpServletRequest request){
+    public void saveAnnouncementBoard(IntegrateBoardModel boardModel, HttpServletRequest request) {
 
         // 배포때는 수정해야할 듯
-        String mainurl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/";
+        String mainurl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/";
 
         // http://localhost:5000/Temporrary_files/1/ 까지의 파일경로를 변경해주자
         String changeTargetFolderPath
-                = mainurl+AllStaticStatus.temporaryImageFiles.substring(
-                        AllStaticStatus.temporaryImageFiles
-                                .indexOf("Temporary"))
-                + boardModel.getUserModel().getUserId()+"/";
+                = mainurl + AllStaticStatus.temporaryImageFiles.substring(
+                AllStaticStatus.temporaryImageFiles
+                        .indexOf("Temporary"))
+                + boardModel.getUserModel().getUserId() + "/";
 
         // 앞의 C나 home 루트를 제외시킴
-        String changeFolerPath = mainurl+AllStaticStatus.saveImageFileRoot
-                .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang"))+makeFile.nowDate()+"/";
+        String changeFolerPath = mainurl + AllStaticStatus.saveImageFileRoot
+                .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang")) + makeFile.nowDate() + "/";
 
         // 바꿔줘야함 문자열 받은걸
-        String changeBoardContent = boardModel.getContent().replace(changeTargetFolderPath,changeFolerPath);
+        String changeBoardContent = boardModel.getContent().replace(changeTargetFolderPath, changeFolerPath);
         boardModel.setContent(changeBoardContent);
 
         integrateBoardRepository.save(boardModel);
@@ -185,12 +185,12 @@ public class AdminService1 {
 
     // 카테고리별로 가져올수 있는 통합 메소드
     @Transactional(readOnly = true)
-    public List<IntegrateBoardModel> findAllAndCategoryBoard(AdminBoardCategory adminBoardCategory){
+    public List<IntegrateBoardModel> findAllAndCategoryBoard(AdminBoardCategory adminBoardCategory) {
 
         ArrayList<IntegrateBoardModel> arrayList = new ArrayList<>();
 
-        for (IntegrateBoardModel intergrateBoard:integrateBoardRepository.findAllByAdminBoardCategory(adminBoardCategory)
-             ) {
+        for (IntegrateBoardModel intergrateBoard : integrateBoardRepository.findAllByAdminBoardCategory(adminBoardCategory)
+        ) {
             intergrateBoard.getUserModel().setPassword("");
             arrayList.add(intergrateBoard);
         }
@@ -199,9 +199,9 @@ public class AdminService1 {
     }
 
     @Transactional(readOnly = true)
-    public Optional<IntegrateBoardModel> findAnnouncementBoard(int boardId){
+    public Optional<IntegrateBoardModel> findAnnouncementBoard(int boardId) {
 
-        Optional<IntegrateBoardModel> integrateBoardModel =integrateBoardRepository.findById(boardId);
+        Optional<IntegrateBoardModel> integrateBoardModel = integrateBoardRepository.findById(boardId);
 
         integrateBoardModel.get().getUserModel().setPassword("");
         return integrateBoardModel;
