@@ -9,6 +9,7 @@ import com.auction.nowauctionb.sellerAssociated.service.SellerService1;
 import com.auction.nowauctionb.sellerAssociated.service.ShoppingMallService1;
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,11 +20,13 @@ import org.springframework.web.multipart.MultipartRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor
+@Log4j2
 @RequestMapping(value = "seller")
 @RestController
 public class SellerController1 {
@@ -105,17 +108,7 @@ public class SellerController1 {
         }
     }
 
-    // 제품등록
-    @PostMapping(value = "register-product")
-    public ResponseEntity registerProduct(@RequestParam("productName") String productName,
-                                          @RequestParam("productPrice") String productPrice,
-                                          Authentication authentication,
-                                          HttpServletRequest request) {
 
-        int resultNum = shoppingMallService1.saveProduct(authentication, productName, productPrice, request);
-
-        return new ResponseEntity("good-product", HttpStatus.OK);
-    }
 
     // 임시파일 삭제
     @PostMapping(value = "temporary-image-save", produces = "application/json")
@@ -133,9 +126,11 @@ public class SellerController1 {
     // 사용하지 않는 이미지파일을 옮기면 더미데이터가 생성되는 꼴
 
 
+    // 제품등록
     @PostMapping(value = "save-product")
     public ResponseEntity saveProduct(@RequestParam("productname") String productname,
-                                      @RequestParam("productprice") String productprice,
+                                      @RequestParam("productprice") int productprice,
+                                      @RequestParam("productquantity") int productquantity,
                                       @RequestParam("content") String content,
                                       @RequestParam(value="thumbnail1", required=false) MultipartFile file1,
                                       @RequestParam(value="thumbnail2", required=false) MultipartFile file2,
@@ -143,30 +138,35 @@ public class SellerController1 {
                                       Authentication authentication,
                                       HttpServletRequest request) {
 
-        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+//        System.out.println("productname" + productname);
+//        System.out.println("productprice" +productprice);
+//        System.out.println("productquantity"+ productquantity);
+//        System.out.println("content" +content);
+//        System.out.println("thumbnail1" + file1);
+//        System.out.println("thumbnail2" + file2);
+//        System.out.println("thumbnail3" + file3);
 
-        System.out.println("productname" + productname);
-        System.out.println("productprice" +productprice);
-        System.out.println("content" +content);
-        System.out.println("thumbnail1" + file1);
-        System.out.println("thumbnail2" + file2);
-        System.out.println("thumbnail3" + file3);
+        List<MultipartFile> fileList = new ArrayList<MultipartFile>();
+        
+        // 좀더 간결한 코드 필요
+        if( file1 != null )
+            fileList.add(file1);
+        if( file2 != null )
+            fileList.add(file2);
+        if( file3 != null )
+            fileList.add(file3);
 
+        int resultNum = shoppingMallService1.saveProduct(authentication,
+                productname,productprice,productquantity,content,fileList,request);
 
+        if(resultNum == 1 ){
+            return new ResponseEntity<>("OK", HttpStatus.OK);
+        }
 
+        if(resultNum == -4 || resultNum == -5 ){
+            return new ResponseEntity<>("Picture Error", HttpStatus.BAD_REQUEST);
+        }
 
-//        adminService1.saveAnnouncementBoardImageFIle(principalDetails.getUserModel().getUserId(),boardData.get("content"));
-//        adminService1.saveAnnouncementBoard(
-//                IntegrateBoardModel.builder()
-//                        .title(boardData.get("title"))
-//                        .Content(boardData.get("content"))
-//                        .userModel(principalDetails.getUserModel())
-//                        .adminBoardCategory(AdminBoardCategory.Announcemnet)
-//                        .build(),
-//                request
-//        );
-
-
-        return new ResponseEntity<>("OK", HttpStatus.OK);
+        return new ResponseEntity<>("Server Or Client Request Error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

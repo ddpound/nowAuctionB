@@ -3,6 +3,7 @@ package com.auction.nowauctionb.sellerAssociated.service;
 import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
+import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.sellerAssociated.model.ProductModel;
 import com.auction.nowauctionb.sellerAssociated.model.ShoppinMallModel;
 import com.auction.nowauctionb.sellerAssociated.repository.ProductModelRepository;
@@ -10,16 +11,19 @@ import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepo
 import lombok.RequiredArgsConstructor;
 
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
+@Log4j2
 @RequiredArgsConstructor
 @Service
 public class ShoppingMallService1 {
@@ -129,18 +133,69 @@ public class ShoppingMallService1 {
     @Transactional
     public int saveProduct(Authentication authentication,
                            String productName,
-                           String productPrice,
+                           int productPrice,
+                           int productquantity,
+                           String content,
+                           List<MultipartFile> fileList,
                            HttpServletRequest request){
 
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
+
+        StringBuilder productFilePath = new StringBuilder();
+        StringBuilder productUrlPath = new StringBuilder();
+
+        // 파일저장 (make file)
+        // 1. url 사진 경로
+        // 2. 컴퓨터 사진 파일 경로
+
+        // 받아온 썸네일 길이부터
+        if(fileList.size() > 0){
+
+            if(fileList.size() > 3 ){
+
+                return -4; // 3개 이상의 썸네일
+            }
+
+            Map<Integer,String> returnPathName = new HashMap<>();
+
+            for (MultipartFile file : fileList
+                 ) {
+                 returnPathName = makeFile.makeFileImage(principalDetails.getUserModel(), file,request);
+
+                 productUrlPath.append(returnPathName.get(1)).append(",");
+                 productFilePath.append(returnPathName.get(2)).append(",");
+            }
+
+
+        }else{
+            return -5 ; // no thumbnail
+        }
+
+        // 위 필터로 썸네일은 무조건 존재한다는 조건에
+
+        // 주의 반드시 옮기고 난다음에 content를 수정할것
+        makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(),content);
+        makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
+
         ProductModel productModel = ProductModel.builder()
                 .productName(productName)
-                .productPrice(Integer.parseInt(productPrice))
+                .productPrice(productPrice)
+                .productQuantity(productquantity)
+                .pictureFilePath(productFilePath.toString())
+                .content(makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(),content,request))
+                .pictureUrlPath(productUrlPath.toString())
                 .userModel(principalDetails.getUserModel())
                 .build();
 
-        productModelRepository.save(productModel);
+        try {
+            productModelRepository.save(productModel);
+
+        }catch (Exception e){
+            log.info(e);
+            return -1; // 단순 에러
+        }
+
         return 1;
     }
 

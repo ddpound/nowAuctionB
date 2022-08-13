@@ -1,6 +1,5 @@
 package com.auction.nowauctionb.sellerAssociated.model;
 
-import com.auction.nowauctionb.admin.model.AdminBoardCategory;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -35,15 +34,19 @@ public class ProductModel {
     private int productPrice;
 
     // 퀄리티와 다른 퀀티티, 즉 수량을 말함
-    private int quantity;
+    private int productQuantity;
 
     // 제품 설명, surmmernote로 할 예정
     @Lob
-    private String Content;
+    private String content;
 
     // 사진 경로 , 및 썸네일 대표 3장씩 나오도록 하자
-    @Lob
-    private String Pictures;
+    // 3장의 경로를 담을예정이니 길이가 길어야함
+    @Column(length = 1000)
+    private String pictureFilePath;
+
+    @Column(length = 1000)
+    private String pictureUrlPath;
 
     @CreationTimestamp
     private Timestamp createDate;
@@ -51,10 +54,18 @@ public class ProductModel {
     @UpdateTimestamp
     private Timestamp modifyDate;
 
-    public List<String> getPicturesList(){
-        if(this.Pictures.length() > 0){
+    public List<String> getPictureFilePathList(){
+        if(this.pictureFilePath.length() > 0){
             // , 로 스플릿 해서 배열로 리턴해준다
-            return Arrays.asList(this.Pictures.split(","));
+            return Arrays.asList(this.pictureFilePath.split(","));
+        }
+        return new ArrayList<>();
+    }
+
+    public List<String> getPictureUrlPathList(){
+        if(this.pictureUrlPath.length() > 0){
+            // , 로 스플릿 해서 배열로 리턴해준다
+            return Arrays.asList(this.pictureFilePath.split(","));
         }
         return new ArrayList<>();
     }

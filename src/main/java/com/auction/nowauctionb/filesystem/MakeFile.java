@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
@@ -258,6 +259,35 @@ public class MakeFile {
     public void fileSearchAndDelete(){
 
 
+    }
+
+    // 주의 content만 수정됨
+    // 현재 모든 게시판의 content를 받아와서
+    // 파일을 옮기는 도중에 옮긴 파일경로 수정을 위해 따로 만들어둠
+    public String changeContentImageUrlPath(int userId, String content, ServletRequest request){
+
+        String mainurl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/";
+
+        // http://localhost:5000/Temporrary_files/1/ 까지의 파일경로를 변경해주자
+        // 바꿔줄 경로
+        String changeTargetFolderPath = mainurl
+                + AllStaticStatus
+                .temporaryImageFiles
+                .substring(AllStaticStatus.temporaryImageFiles.indexOf("Temporary"))
+                +userId+"/";
+
+
+        // 바뀔 경로명
+        // C나 home루트명 제외시키기
+        String changeFolderPath = mainurl
+                +AllStaticStatus
+                .saveImageFileRoot
+                .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang"))
+                +nowDate()+"/";
+
+
+
+        return content.replace(changeTargetFolderPath,changeFolderPath);
     }
 
 

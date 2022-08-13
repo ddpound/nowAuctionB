@@ -173,11 +173,11 @@ public class AdminService1 {
                 + boardModel.getUserModel().getUserId() + "/";
 
         // 앞의 C나 home 루트를 제외시킴
-        String changeFolerPath = mainurl + AllStaticStatus.saveImageFileRoot
+        String changeFolderPath = mainurl + AllStaticStatus.saveImageFileRoot
                 .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang")) + makeFile.nowDate() + "/";
 
         // 바꿔줘야함 문자열 받은걸
-        String changeBoardContent = boardModel.getContent().replace(changeTargetFolderPath, changeFolerPath);
+        String changeBoardContent = boardModel.getContent().replace(changeTargetFolderPath, changeFolderPath);
         boardModel.setContent(changeBoardContent);
 
         integrateBoardRepository.save(boardModel);
