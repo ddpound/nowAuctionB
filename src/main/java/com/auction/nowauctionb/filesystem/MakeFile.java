@@ -1,6 +1,7 @@
 package com.auction.nowauctionb.filesystem;
 
 
+import com.auction.nowauctionb.admin.model.AuthNames;
 import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.google.gson.JsonObject;
@@ -146,7 +147,10 @@ public class MakeFile {
     // 원하는 파일들을 모두 Save파일에 옮기고
     // 컨텐츠도 받아와야함 ,
     // content 에 해당 애가 검색안된다면 옮기지 말아야함
-    public void saveMoveImageFiles(int fileId, String content){
+
+    // admin > 사진제한 x
+    // seller > 사진 제한 10장
+    public int saveMoveImageFiles(int fileId, String content, AuthNames auth){
 
         String temporary = AllStaticStatus.temporaryImageFiles+fileId;
 
@@ -157,47 +161,55 @@ public class MakeFile {
         File[] files = dir.listFiles();
 
         if(files != null){
-            for(File f : files) {
 
-                // 파일 이름이 "종류"-"filename"
-                // 이렇게 지정됨
+            // 관리자가 아니며 옮겨야할 파일이 10장 이상일때
+            if (AuthNames.Admin != auth && files.length >10){
+                return -3; // 이미지 파일 10장을 넘김
+            }else{
+                for(File f : files) {
 
-                String SearchfileName = Integer.toString(fileId);
+                    // 파일 이름이 "종류"-"filename"
+                    // 이렇게 지정됨
 
-                // 아이디로 시작하는 모든 사진들
-                if(f.isFile() && f.getName().startsWith(SearchfileName)) {
+                    String SearchfileName = Integer.toString(fileId);
 
-                    // 여기서 중요한 부분 content안에 해당 사진이 있는지를 검사
-                    // 있을 때만 이동, 그럼 나머지는 삭제되고 본파일에는 게시판에있는것만 옮겨짐
-                    if(content.contains(f.getName())){
-                        // 이름 변경 -> 파일 이동 -> 오리지널 파일로 이동 url 는 그럼?
-                        // DB 이름도 변경해야함 Content 검사해서 변경해서 넣어주기
-                        String changeFileName = saveFolderRoot + f.getName();
+                    // 아이디로 시작하는 모든 사진들
+                    if(f.isFile() && f.getName().startsWith(SearchfileName)) {
 
-                        // 저장할 파일의 경로 (걍로와 이름)
-                        File targetFile = new File(changeFileName);
-                        try {
-                            FileInputStream fileInputStream = new FileInputStream(f); // 저장할 파일
-                            FileUtils.copyInputStreamToFile(fileInputStream, targetFile); //저장
+                        // 여기서 중요한 부분 content안에 해당 사진이 있는지를 검사
+                        // 있을 때만 이동, 그럼 나머지는 삭제되고 본파일에는 게시판에있는것만 옮겨짐
+                        if(content.contains(f.getName())){
+                            // 이름 변경 -> 파일 이동 -> 오리지널 파일로 이동 url 는 그럼?
+                            // DB 이름도 변경해야함 Content 검사해서 변경해서 넣어주기
+                            String changeFileName = saveFolderRoot + f.getName();
 
-                            // 다하면 꼭 닫아줘야하는 의무가 있다
-                            fileInputStream.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                            // 저장할 파일의 경로 (걍로와 이름)
+                            File targetFile = new File(changeFileName);
+                            try {
+                                FileInputStream fileInputStream = new FileInputStream(f); // 저장할 파일
+                                FileUtils.copyInputStreamToFile(fileInputStream, targetFile); //저장
+
+                                // 다하면 꼭 닫아줘야하는 의무가 있다
+                                fileInputStream.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
                         }
+
+
                     }
 
-
                 }
-
             }
+
+
 
         }else{
             log.info("not image");
         }
 
 
-
+        return 1; //문제 없다면 1
     }
 
 

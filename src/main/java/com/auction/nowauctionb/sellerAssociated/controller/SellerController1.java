@@ -163,10 +163,28 @@ public class SellerController1 {
             return new ResponseEntity<>("OK", HttpStatus.OK);
         }
 
+        if(resultNum == -3 ){
+            return new ResponseEntity<>("You used more than 10 pictures", HttpStatus.OK);
+        }
+
         if(resultNum == -4 || resultNum == -5 ){
             return new ResponseEntity<>("Picture Error", HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity<>("Server Or Client Request Error", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // 현재 해당 유저의 아이디를 받거나 해서
+    // 뒤로 가기 동작 감지시 바로 삭제해주는 엔드포인트
+    @GetMapping(value = "delete-temporary-iamge")
+    public ResponseEntity backAndDeleteTemporary(Authentication authentication,
+                                                 HttpServletRequest request){
+
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+
+
+        makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
+
+        return new ResponseEntity<>("delete success", HttpStatus.OK);
     }
 }

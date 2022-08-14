@@ -1,5 +1,6 @@
 package com.auction.nowauctionb.sellerAssociated.service;
 
+import com.auction.nowauctionb.admin.model.AuthNames;
 import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
@@ -175,8 +176,12 @@ public class ShoppingMallService1 {
         // 위 필터로 썸네일은 무조건 존재한다는 조건에
 
         // 주의 반드시 옮기고 난다음에 content를 수정할것
-        makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(),content);
+        int makeFileResult = makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(),content, AuthNames.Seller);
         makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
+
+        if(makeFileResult == -1){
+            return -3; // 사진 10을 넘겨버림
+        }
 
         ProductModel productModel = ProductModel.builder()
                 .productName(productName)
@@ -196,6 +201,10 @@ public class ShoppingMallService1 {
             return -1; // 단순 에러
         }
 
+
+        // 문제 없다면 반환 1, 여기까지왔다면 임시파일 삭제
+        // 임시파일 삭제
+        makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
         return 1;
     }
 
@@ -218,7 +227,7 @@ public class ShoppingMallService1 {
     public void saveProductImageFIle(int userproductdId,String content){
 
         // 파일 관련 부분
-        makeFile.saveMoveImageFiles(userproductdId, content);
+        makeFile.saveMoveImageFiles(userproductdId, content, AuthNames.Seller);
         makeFile.deleteTemporary(userproductdId);
 
     }

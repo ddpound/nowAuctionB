@@ -2,6 +2,7 @@ package com.auction.nowauctionb.admin.service;
 
 
 import com.auction.nowauctionb.admin.model.AdminBoardCategory;
+import com.auction.nowauctionb.admin.model.AuthNames;
 import com.auction.nowauctionb.admin.model.IntegrateBoardModel;
 import com.auction.nowauctionb.admin.repository.IntegrateBoardRepository;
 import com.auction.nowauctionb.allstatic.AllStaticStatus;
@@ -154,7 +155,7 @@ public class AdminService1 {
     public void saveAnnouncementBoardImageFIle(int userAndBoardId, String content) {
 
         // 파일 관련 부분
-        makeFile.saveMoveImageFiles(userAndBoardId, content);
+        makeFile.saveMoveImageFiles(userAndBoardId, content , AuthNames.Admin);
         makeFile.deleteTemporary(userAndBoardId);
 
     }
