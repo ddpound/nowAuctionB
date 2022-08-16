@@ -1,6 +1,5 @@
 package com.auction.nowauctionb.sellerAssociated.model;
 
-import com.auction.nowauctionb.loginjoin.model.UserModel;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -22,10 +21,10 @@ public class ProductModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    // 제품 등록자
+    // 쇼핑몰
     @ManyToOne
-    @JoinColumn
-    private UserModel userModel;
+    @JoinColumn(name = "shopping_mall")
+    private ShoppingMallModel shoppingMall;
 
     // 제품이름
     private String productName;

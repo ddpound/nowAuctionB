@@ -26,12 +26,12 @@ public class TransactionHistory {
 
     // 제품 등록자
     @ManyToOne
-    @JoinColumn(name = "seller")
+    @JoinColumn(referencedColumnName = "userId", name = "seller")
     private UserModel seller;
 
     // 제품 구매자
     @ManyToOne
-    @JoinColumn(name = "buyer")
+    @JoinColumn(referencedColumnName = "userId" , name = "buyer")
     private UserModel buyer;
 
     // 이 테이블 안에는 한개의 제품만을 나타낸다

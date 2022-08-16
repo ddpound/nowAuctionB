@@ -15,7 +15,7 @@ import java.sql.Timestamp;
 @Setter
 @Getter
 @Entity
-public class ShoppinMallModel {
+public class ShoppingMallModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

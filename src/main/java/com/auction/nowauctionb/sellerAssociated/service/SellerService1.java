@@ -1,24 +1,18 @@
 package com.auction.nowauctionb.sellerAssociated.service;
 
-import com.auction.nowauctionb.admin.model.IntegrateBoardModel;
-import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.loginjoin.repository.UserModelRepository;
 import com.auction.nowauctionb.sellerAssociated.frontmodel.ShoppingMallFront;
-import com.auction.nowauctionb.sellerAssociated.model.ProductModel;
 import com.auction.nowauctionb.sellerAssociated.model.SellerCoupon;
-import com.auction.nowauctionb.sellerAssociated.model.ShoppinMallModel;
-import com.auction.nowauctionb.sellerAssociated.repository.ProductModelRepository;
+import com.auction.nowauctionb.sellerAssociated.model.ShoppingMallModel;
 import com.auction.nowauctionb.sellerAssociated.repository.SellerCouponRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepositry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.servlet.http.HttpServletRequest;
 
 
 @RequiredArgsConstructor
@@ -74,18 +68,18 @@ public class SellerService1 {
 
     @Transactional(readOnly = true)
     public ShoppingMallFront checkShoppingMall(PrincipalDetails principalDetails){
-        ShoppinMallModel shoppinMallModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
+        ShoppingMallModel shoppingMallModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
 
-        if(shoppinMallModel !=null){
-            UserModel userModel = shoppinMallModel.getUserModel();
+        if(shoppingMallModel !=null){
+            UserModel userModel = shoppingMallModel.getUserModel();
             userModel.setPassword("");
 
             // 프론트 반환할때 비밀번호가 나가지않게... 근데 다른 좋은방법을 생각해보자
             ShoppingMallFront shoppingMallFront = ShoppingMallFront.builder()
-                    .id(shoppinMallModel.getId())
-                    .shoppingMallName(shoppinMallModel.getShoppingMallName())
-                    .shppingMallExplanation(shoppinMallModel.getShoppingMallExplanation())
-                    .thumnail(shoppinMallModel.getThumbnailUrlPath())
+                    .id(shoppingMallModel.getId())
+                    .shoppingMallName(shoppingMallModel.getShoppingMallName())
+                    .shppingMallExplanation(shoppingMallModel.getShoppingMallExplanation())
+                    .thumnail(shoppingMallModel.getThumbnailUrlPath())
                     .userModel(userModel)
                     .build();
 

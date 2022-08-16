@@ -4,9 +4,8 @@ import com.auction.nowauctionb.admin.model.AuthNames;
 import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
-import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.sellerAssociated.model.ProductModel;
-import com.auction.nowauctionb.sellerAssociated.model.ShoppinMallModel;
+import com.auction.nowauctionb.sellerAssociated.model.ShoppingMallModel;
 import com.auction.nowauctionb.sellerAssociated.repository.ProductModelRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepositry;
 import lombok.RequiredArgsConstructor;
@@ -49,9 +48,9 @@ public class ShoppingMallService1 {
         }
 
 
-        ShoppinMallModel shoppinMallModel = shoppingMallModelRepositry.findByShoppingMallName(shoppingMallName);
+        ShoppingMallModel shoppingMallModel = shoppingMallModelRepositry.findByShoppingMallName(shoppingMallName);
 
-        if(shoppinMallModel != null ){
+        if(shoppingMallModel != null ){
             // 중복된 쇼핑몰이름
             return -2;
         }
@@ -62,8 +61,8 @@ public class ShoppingMallService1 {
         Map<Integer,String> fileNames =makeFile.makeFileImage(principalDetails.getUserModel(), multipartFile,request);
 
 
-        ShoppinMallModel shoppinMallModelSave =
-                ShoppinMallModel.builder()
+        ShoppingMallModel shoppingMallModelSave =
+                ShoppingMallModel.builder()
                         .shoppingMallName(shoppingMallName)
                         .shoppingMallExplanation(shoppingMallExplanation)
                         .thumbnailUrlPath(fileNames.get(1))
@@ -71,7 +70,7 @@ public class ShoppingMallService1 {
                         .userModel(principalDetails.getUserModel())
                         .build();
 
-        shoppingMallModelRepositry.save(shoppinMallModelSave);
+        shoppingMallModelRepositry.save(shoppingMallModelSave);
 
         return 1;
     }
@@ -97,11 +96,11 @@ public class ShoppingMallService1 {
 
         // 해당유저가 이미 쇼핑몰이 있다는 가정 하에
         // 영속화
-        ShoppinMallModel shoppinMallModel1ByUserModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
+        ShoppingMallModel shoppingMallModel1ByUserModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
 
         // 사진이 달라졌을경우 삭제 후 추가
         // 그대로라면 그냥 그대로
-        if(shoppinMallModel1ByUserModel == null ) {
+        if(shoppingMallModel1ByUserModel == null ) {
             // 해당 유저가 가진 쇼핑몰이 없을 때
             return -3;
         }
@@ -110,13 +109,13 @@ public class ShoppingMallService1 {
         if(urlFilePath == null){
             // 새로운 파일을 저장하기 앞서 먼저 삭제해야함 해당 사진은
             // 파일 경로를 불러와 그대로 삭제
-            makeFile.filePathImageDelete(shoppinMallModel1ByUserModel.getThumbnailFilePath());
+            makeFile.filePathImageDelete(shoppingMallModel1ByUserModel.getThumbnailFilePath());
             // 새로운 파일저장 입니다.
             // 1. url 사진 경로
             // 2. 컴퓨터 사진 파일 경로
             Map<Integer,String> fileNames =makeFile.makeFileImage(principalDetails.getUserModel(), multipartFile,request);
-            shoppinMallModel1ByUserModel.setThumbnailUrlPath(fileNames.get(1));
-            shoppinMallModel1ByUserModel.setThumbnailFilePath(fileNames.get(2));
+            shoppingMallModel1ByUserModel.setThumbnailUrlPath(fileNames.get(1));
+            shoppingMallModel1ByUserModel.setThumbnailFilePath(fileNames.get(2));
         }
 
         // 아니면 냅둔다
@@ -124,8 +123,8 @@ public class ShoppingMallService1 {
 
 
         // 더티체킹
-        shoppinMallModel1ByUserModel.setShoppingMallName(shoppingMallName);
-        shoppinMallModel1ByUserModel.setShoppingMallExplanation(shoppingMallExplanation);
+        shoppingMallModel1ByUserModel.setShoppingMallName(shoppingMallName);
+        shoppingMallModel1ByUserModel.setShoppingMallExplanation(shoppingMallExplanation);
 
 
 
@@ -142,6 +141,8 @@ public class ShoppingMallService1 {
 
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
+        // 영속화
+        ShoppingMallModel shoppingMallModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
 
         StringBuilder productFilePath = new StringBuilder();
         StringBuilder productUrlPath = new StringBuilder();
@@ -190,7 +191,7 @@ public class ShoppingMallService1 {
                 .pictureFilePath(productFilePath.toString())
                 .content(makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(),content,request))
                 .pictureUrlPath(productUrlPath.toString())
-                .userModel(principalDetails.getUserModel())
+                .shoppingMall(shoppingMallModel)
                 .build();
 
         try {
@@ -209,9 +210,9 @@ public class ShoppingMallService1 {
     }
 
     @Transactional(readOnly = true)
-    public List<ShoppinMallModel> findAllShoppingMallList(){
+    public List<ShoppingMallModel> findAllShoppingMallList(){
 
-        List<ShoppinMallModel> findShoppingMallModel = shoppingMallModelRepositry.findAll();
+        List<ShoppingMallModel> findShoppingMallModel = shoppingMallModelRepositry.findAll();
 
 
         if(findShoppingMallModel.size() > 0){
@@ -232,7 +233,9 @@ public class ShoppingMallService1 {
 
     }
     @Transactional
-    public void saveProduct(ProductModel productModel, HttpServletRequest request){
+    public void saveProduct(Authentication authentication, ProductModel productModel, HttpServletRequest request){
+
+        PrincipalDetails principalDetails =(PrincipalDetails) authentication.getPrincipal();
 
         // 배포때는 수정해야할 듯
         String mainurl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/";
@@ -242,7 +245,7 @@ public class ShoppingMallService1 {
                 = mainurl+ AllStaticStatus.temporaryImageFiles.substring(
                 AllStaticStatus.temporaryImageFiles
                         .indexOf("Temporary"))
-                + productModel.getUserModel().getUserId()+"/";
+                + principalDetails.getUserModel().getUserId()+"/";
 
         // 앞의 C나 home 루트를 제외시킴
         String changeFolerPath = mainurl+AllStaticStatus.saveImageFileRoot

@@ -1,10 +1,7 @@
 package com.auction.nowauctionb.sellerAssociated.controller;
 
-import com.auction.nowauctionb.admin.model.AdminBoardCategory;
-import com.auction.nowauctionb.admin.model.IntegrateBoardModel;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
-import com.auction.nowauctionb.sellerAssociated.model.ShoppinMallModel;
 import com.auction.nowauctionb.sellerAssociated.service.SellerService1;
 import com.auction.nowauctionb.sellerAssociated.service.ShoppingMallService1;
 import com.google.gson.JsonObject;
@@ -13,17 +10,13 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @RequiredArgsConstructor
 @Log4j2
