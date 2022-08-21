@@ -205,4 +205,10 @@ public class SellerController1 {
 
         return new ResponseEntity<>("delete success", HttpStatus.OK);
     }
+
+    @GetMapping(value = "get-category-list")
+    public ResponseEntity getCategory(){
+
+        return new ResponseEntity<>("delete success", HttpStatus.OK);
+    }
 }

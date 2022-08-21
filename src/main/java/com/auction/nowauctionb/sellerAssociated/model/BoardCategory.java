@@ -22,7 +22,6 @@ public class BoardCategory {
     @JoinColumn(name = "shopping_mall")
     private ShoppingMallModel shoppingMall;
 
-
     @Lob
     private String categoryName;
 
