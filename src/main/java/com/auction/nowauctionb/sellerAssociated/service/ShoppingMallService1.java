@@ -6,6 +6,7 @@ import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
 import com.auction.nowauctionb.sellerAssociated.model.ProductModel;
 import com.auction.nowauctionb.sellerAssociated.model.ShoppingMallModel;
+import com.auction.nowauctionb.sellerAssociated.repository.CommonModelRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ProductModelRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepositry;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,8 @@ public class ShoppingMallService1 {
     private final MakeFile makeFile;
 
     private final ProductModelRepository productModelRepository;
+
+    private final CommonModelRepository commonModelRepository;
 
     @Transactional
     public int SaveNewShoppingMall(Authentication authentication,
@@ -232,8 +235,10 @@ public class ShoppingMallService1 {
         makeFile.deleteTemporary(userproductdId);
 
     }
+
+    // 카테고리를 만들었을때 이름이 똑같으면, 알아서 만들어지도록할지..아니면...음..
     @Transactional
-    public void saveProduct(Authentication authentication, ProductModel productModel, HttpServletRequest request){
+    public int saveBoard(Authentication authentication, String title, String content,MultipartFile thumbnail,HttpServletRequest request){
 
         PrincipalDetails principalDetails =(PrincipalDetails) authentication.getPrincipal();
 
@@ -252,9 +257,11 @@ public class ShoppingMallService1 {
                 .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang"))+makeFile.nowDate()+"/";
 
         // 바꿔줘야함 문자열 받은걸
-        String changeBoardContent = productModel.getContent().replace(changeTargetFolderPath,changeFolerPath);
-        productModel.setContent(changeBoardContent);
+        String changeBoardContent = content.replace(changeTargetFolderPath,changeFolerPath);
 
-        productModelRepository.save(productModel);
+
+
+
+        return 1;
     }
 }
