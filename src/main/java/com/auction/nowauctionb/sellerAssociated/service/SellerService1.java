@@ -83,8 +83,8 @@ public class SellerService1 {
                     .userModel(userModel)
                     .build();
 
-
             return shoppingMallFront;
+
         }else {
             return null;
         }

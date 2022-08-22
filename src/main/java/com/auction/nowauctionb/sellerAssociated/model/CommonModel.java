@@ -24,12 +24,26 @@ public class CommonModel {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
+    private String title;
+
     @ManyToOne
     @JoinColumn
     private UserModel userModel;
 
     @Lob
     private String Content;
+
+    // 사진 경로 , 및 썸네일 대표 3장씩 나오도록 하자
+    // 3장의 경로를 담을예정이니 길이가 길어야함
+    @Column(length = 1000)
+    private String pictureFilePath;
+
+    @Column(length = 1000)
+    private String pictureUrlPath;
+
+    @ManyToOne
+    @JoinColumn(name = "board_category")
+    private BoardCategory boardCategory;
 
     @CreationTimestamp
     private Timestamp createDate;

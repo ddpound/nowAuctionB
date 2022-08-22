@@ -171,11 +171,12 @@ public class SellerController1 {
     public ResponseEntity saveBoard(@RequestParam("title") String title,
                                     @RequestParam("content") String content,
                                     @RequestParam(value="thumbnail", required=false) MultipartFile thumbnail,
+                                    @RequestParam(value = "category", required = false) int categoryId,
                                     Authentication authentication,
                                     HttpServletRequest request) {
 
         int resultNum = shoppingMallService1.saveBoard(authentication,
-                title,content,thumbnail,request);
+                title,content,thumbnail,categoryId,request);
 
         if(resultNum == 1 ){
             return new ResponseEntity<>("OK", HttpStatus.OK);
@@ -207,8 +208,38 @@ public class SellerController1 {
     }
 
     @GetMapping(value = "get-category-list")
-    public ResponseEntity getCategory(){
+    public ResponseEntity getCategory(Authentication authentication){
 
-        return new ResponseEntity<>("delete success", HttpStatus.OK);
+        return new ResponseEntity<>(shoppingMallService1.getBoardCategoryList(authentication), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "save-category")
+    public ResponseEntity saveCategory(Authentication authentication,
+                                       @RequestParam(value = "categoryName") String categoryName){
+
+        int resultNum = shoppingMallService1.saveBoardCategory(authentication,categoryName);
+
+        if(resultNum ==1){
+            return new ResponseEntity<>("success save category", HttpStatus.OK);
+        }else if(resultNum == -2){
+            return new ResponseEntity<>("blank words", HttpStatus.BAD_REQUEST);
+        }
+        else{
+            return new ResponseEntity<>("fail save category", HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @PutMapping(value = "modify-category")
+    public ResponseEntity modifyCategory(Authentication authentication,
+                                       String categoryName){
+
+        int resultNum = shoppingMallService1.modifyBoardCategory(authentication,categoryName);
+
+        if(resultNum ==1){
+            return new ResponseEntity<>("success modify category", HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>("fail modify category", HttpStatus.BAD_REQUEST);
+        }
     }
 }

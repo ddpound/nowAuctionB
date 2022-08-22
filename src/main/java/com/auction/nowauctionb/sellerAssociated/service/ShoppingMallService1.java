@@ -4,8 +4,11 @@ import com.auction.nowauctionb.admin.model.AuthNames;
 import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
+import com.auction.nowauctionb.sellerAssociated.model.BoardCategory;
+import com.auction.nowauctionb.sellerAssociated.model.CommonModel;
 import com.auction.nowauctionb.sellerAssociated.model.ProductModel;
 import com.auction.nowauctionb.sellerAssociated.model.ShoppingMallModel;
+import com.auction.nowauctionb.sellerAssociated.repository.BoardCategoryRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.CommonModelRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ProductModelRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepositry;
@@ -22,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 @Log4j2
@@ -36,6 +40,8 @@ public class ShoppingMallService1 {
     private final ProductModelRepository productModelRepository;
 
     private final CommonModelRepository commonModelRepository;
+
+    private final BoardCategoryRepository boardCategoryRepository;
 
     @Transactional
     public int SaveNewShoppingMall(Authentication authentication,
@@ -238,10 +244,26 @@ public class ShoppingMallService1 {
 
     // 카테고리를 만들었을때 이름이 똑같으면, 알아서 만들어지도록할지..아니면...음..
     @Transactional
-    public int saveBoard(Authentication authentication, String title, String content,MultipartFile thumbnail,HttpServletRequest request){
+    public int saveBoard(Authentication authentication,
+                         String title,
+                         String content,
+                         MultipartFile thumbnail,
+                         int categoryId,
+                         HttpServletRequest request){
 
         PrincipalDetails principalDetails =(PrincipalDetails) authentication.getPrincipal();
 
+        Optional<BoardCategory> findBoardCategory = boardCategoryRepository.findById(categoryId);
+
+        // 파일저장
+        // 1. url 사진 경로
+        // 2. 컴퓨터 사진 파일 경로
+        Map<Integer, String> returnPathNams = makeFile.makeFileImage(principalDetails.getUserModel(),thumbnail,request);
+
+        // 바꾸기전에 먼저이동, 검사를 통해 안쓰는 파일들을 삭제시킬 예정
+        makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(),content,AuthNames.Seller);
+
+        // ----------------- 받은 content 를 바꿔주기 경로 ------------------------------//
         // 배포때는 수정해야할 듯
         String mainurl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/";
 
@@ -258,8 +280,94 @@ public class ShoppingMallService1 {
 
         // 바꿔줘야함 문자열 받은걸
         String changeBoardContent = content.replace(changeTargetFolderPath,changeFolerPath);
+        // ----------------- 받은 content 를 바꿔주기 경로 ------------------------------//
 
 
+
+        commonModelRepository.save(CommonModel.builder()
+                .boardCategory(findBoardCategory.get())
+                .userModel(principalDetails.getUserModel())
+                .pictureUrlPath(returnPathNams.get(1))
+                .pictureFilePath(returnPathNams.get(2))
+                .title(title)
+                .Content(changeBoardContent)
+                .build());
+
+
+        // 다 저장했으면 삭제
+        makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
+        return 1;
+    }
+
+    @Transactional(readOnly = true)
+    public List<BoardCategory> getBoardCategoryList(Authentication authentication){
+
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+
+        // 현재 접속중인 유저의 쇼핑몰을 검색
+        ShoppingMallModel shoppingMallModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
+
+        List<BoardCategory> boardCategoryList = boardCategoryRepository.findAllByShoppingMall(shoppingMallModel);
+
+        if(boardCategoryList.size() > 0){
+            for (int i=0 ; i < boardCategoryList.size(); i++) {
+                boardCategoryList.get(i).getShoppingMall().getUserModel().setPassword("");
+            }
+        }
+
+
+        return boardCategoryList;
+    }
+
+    @Transactional
+    public int saveBoardCategory(Authentication authentication, String categoryName){
+
+        if(categoryName.contains(" ")){
+            return -2; // 공백검사
+        }
+
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        ShoppingMallModel shoppingMallModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
+
+        //만약에 이미 있는거라면 세이브 없이 그냥 올바른 값만 보내기
+        if(boardCategoryRepository.findByCategoryName(categoryName) != null){
+            return 1;
+        }
+
+
+        try {
+            boardCategoryRepository.save(BoardCategory
+                    .builder()
+                    .categoryName(categoryName)
+                    .shoppingMall(shoppingMallModel)
+                    .build());
+
+        }catch (Exception e){
+            log.info("boardCategory saveFail, fail shoppingMall"+ shoppingMallModel.getShoppingMallName());
+            return -1; // 특정에러
+        }
+
+
+        return 1;
+    }
+
+    @Transactional
+    public int modifyBoardCategory(Authentication authentication, String categoryName){
+
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        ShoppingMallModel shoppingMallModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
+
+        // 영속화
+        BoardCategory boardCategory = boardCategoryRepository.findByShoppingMall(shoppingMallModel);
+
+        try {
+            // 더티체킹
+            boardCategory.setCategoryName(categoryName);
+
+        }catch (Exception e){
+            log.info("boardCategory modify Fail, fail shoppingMall :"+ shoppingMallModel.getShoppingMallName());
+            return -1; // 특정에러
+        }
 
 
         return 1;
