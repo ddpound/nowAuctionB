@@ -152,16 +152,15 @@ public class AdminService1 {
 
     // 유저의 아이디이자 폴더 이름 가져온다는 뜻
     @Transactional(readOnly = true)
-    public void saveAnnouncementBoardImageFIle(int userAndBoardId, String content) {
+    public String saveAnnouncementBoardImageFIle(int userAndBoardId, String content) {
 
         // 파일 관련 부분
-        makeFile.saveMoveImageFiles(userAndBoardId, content , AuthNames.Admin);
-        makeFile.deleteTemporary(userAndBoardId);
+        return makeFile.saveMoveImageFiles(userAndBoardId, content , AuthNames.Admin).get(2);
 
     }
 
     @Transactional
-    public void saveAnnouncementBoard(IntegrateBoardModel boardModel, HttpServletRequest request) {
+    public void saveAnnouncementBoard(IntegrateBoardModel boardModel, String folderNamePath, HttpServletRequest request) {
 
         // 배포때는 수정해야할 듯
         String mainurl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/";
@@ -174,13 +173,15 @@ public class AdminService1 {
                 + boardModel.getUserModel().getUserId() + "/";
 
         // 앞의 C나 home 루트를 제외시킴
-        String changeFolderPath = mainurl + AllStaticStatus.saveImageFileRoot
-                .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang")) + makeFile.nowDate() + "/";
+        String changeFolderPath = mainurl + folderNamePath
+                .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang"));
 
         // 바꿔줘야함 문자열 받은걸
         String changeBoardContent = boardModel.getContent().replace(changeTargetFolderPath, changeFolderPath);
         boardModel.setContent(changeBoardContent);
 
+        // 임시파일 제를 진행 후 저장 진행
+        makeFile.deleteTemporary(boardModel.getId());
         integrateBoardRepository.save(boardModel);
     }
 

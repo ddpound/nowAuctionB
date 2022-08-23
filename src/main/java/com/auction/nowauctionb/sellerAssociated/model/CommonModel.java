@@ -41,6 +41,10 @@ public class CommonModel {
     @Column(length = 1000)
     private String pictureUrlPath;
 
+    // 이미지파일이 저장된 고유 폴더 경로
+    @Column(length = 500)
+    private String filefolderPath;
+
     @ManyToOne
     @JoinColumn(name = "board_category")
     private BoardCategory boardCategory;

@@ -5,7 +5,7 @@ import com.auction.nowauctionb.chatroom.chatmodel.ChatRoomModel;
 import com.auction.nowauctionb.chatroom.service.ChatSellerService1;
 import com.auction.nowauctionb.sellerAssociated.model.ShoppingMallModel;
 import com.auction.nowauctionb.sellerAssociated.service.ShoppingMallService1;
-import com.auction.nowauctionb.sellerAssociated.service.ShoppingMallService2;
+import com.auction.nowauctionb.sellerAssociated.service.ShoppingMallServiceAll;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +16,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+
+/**
+ *
+ * 모든 클라이언트들이 접근가능함
+ *
+ * */
 @RequiredArgsConstructor
 @RestController
 public class AllAccessibleSellerController {
 
     private final ShoppingMallService1 shoppingMallService1;
 
-    private final ShoppingMallService2 shoppingMallService2;
+    private final ShoppingMallServiceAll shoppingMallServiceAll;
 
     private final ChatSellerService1 chatSellerService1;
 
@@ -48,14 +54,19 @@ public class AllAccessibleSellerController {
     @GetMapping(value = "show-shoppingmall")
     public ResponseEntity showShoppingMall(@RequestParam("id")int shoppingMallId){
 
-        return new ResponseEntity(shoppingMallService2.findShoppingMall(shoppingMallId), HttpStatus.OK);
+        return new ResponseEntity(shoppingMallServiceAll.findShoppingMall(shoppingMallId), HttpStatus.OK);
     }
 
     @GetMapping(value = "show-shoppingmall/find-product-all/{id}")
     public ResponseEntity findProductAll(@PathVariable("id")int shoppingMallId){
 
-        return new ResponseEntity(shoppingMallService2.findAllProduct(shoppingMallId),HttpStatus.OK);
+        return new ResponseEntity(shoppingMallServiceAll.findAllProduct(shoppingMallId),HttpStatus.OK);
     }
 
+    @GetMapping(value = "show-shoppingmall/product-show/{id}")
+    public ResponseEntity showProduct(@PathVariable("id")int productlId){
+
+        return new ResponseEntity(shoppingMallServiceAll.findProductModel(productlId),HttpStatus.OK);
+    }
 
 }

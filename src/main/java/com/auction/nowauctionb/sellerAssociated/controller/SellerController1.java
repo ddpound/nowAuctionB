@@ -64,7 +64,7 @@ public class SellerController1 {
                 shoppingMallExplanation, request);
 
         if (resultNum == 1) {
-            return new ResponseEntity("", HttpStatus.OK);
+            return new ResponseEntity("succeess-save-shppingmall", HttpStatus.OK);
         } else if (resultNum == -2) {
             // 중복된 쇼핑몰 이름
             return new ResponseEntity("Already-ShoppingMall-Name", HttpStatus.BAD_REQUEST);

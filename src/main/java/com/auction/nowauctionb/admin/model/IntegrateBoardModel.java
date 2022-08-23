@@ -37,6 +37,11 @@ public class IntegrateBoardModel {
     // {공지, 그외 관리자가 사용할 보드 통합}
     private AdminBoardCategory adminBoardCategory;
 
+    // 이미지파일이 저장된 고유 폴더 경로
+    @Column(length = 500)
+    private String filefolderPath;
+
+
     @CreationTimestamp
     private Timestamp createDate;
 

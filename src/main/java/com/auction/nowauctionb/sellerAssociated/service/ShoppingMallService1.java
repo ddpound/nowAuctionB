@@ -43,12 +43,25 @@ public class ShoppingMallService1 {
 
     private final BoardCategoryRepository boardCategoryRepository;
 
+
+    /**
+     * 쇼핑몰을 저장 함수
+     * 반환값 1 일때는 올바른 값
+     * -2 일때는 이미 있는 쇼핑몰이라는 뜻
+     * -5 이면 제목이 12자 이상
+     * @param authentication 현재 사용유저가 누구인지 파악
+     * @param multipartFile 썸네일
+     * @param shoppingMallName 쇼핑몰 이름
+     * @param shoppingMallExplanation 쇼핑몰 설명
+     * @param request 파일 저장을 위한 url값을 가져오기
+     * */
     @Transactional
     public int SaveNewShoppingMall(Authentication authentication,
                                    MultipartFile multipartFile,
                                    String shoppingMallName,
                                    String shoppingMallExplanation,
                                    HttpServletRequest request){
+
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
         // 12길이보다 길면
@@ -76,6 +89,7 @@ public class ShoppingMallService1 {
                         .shoppingMallExplanation(shoppingMallExplanation)
                         .thumbnailUrlPath(fileNames.get(1))
                         .thumbnailFilePath(fileNames.get(2))
+                        .filefolderPath(fileNames.get(3))
                         .userModel(principalDetails.getUserModel())
                         .build();
 
@@ -84,9 +98,13 @@ public class ShoppingMallService1 {
         return 1;
     }
 
-    // 수정할때 해야할것
-    // 사진이 추가됐다면 해당 사진은 삭제하고
-    // 새사진을 올려야함
+    /**
+     * 쇼핑몰 수정 메소드 이다
+     * 사진이 새로 추가됐다면 해당사진은삭제
+     * 새사진이 올라온다
+     *
+     *  리턴값이 -5면 제목이 12자 이상 이라는뜻
+     * */
     @Transactional
     public int modifyShoppingMall(Authentication authentication,
                                    MultipartFile multipartFile,
@@ -118,7 +136,7 @@ public class ShoppingMallService1 {
         if(urlFilePath == null){
             // 새로운 파일을 저장하기 앞서 먼저 삭제해야함 해당 사진은
             // 파일 경로를 불러와 그대로 삭제
-            makeFile.filePathImageDelete(shoppingMallModel1ByUserModel.getThumbnailFilePath());
+            makeFile.folderPathImageDelete(shoppingMallModel1ByUserModel.getFilefolderPath());
             // 새로운 파일저장 입니다.
             // 1. url 사진 경로
             // 2. 컴퓨터 사진 파일 경로
@@ -126,9 +144,6 @@ public class ShoppingMallService1 {
             shoppingMallModel1ByUserModel.setThumbnailUrlPath(fileNames.get(1));
             shoppingMallModel1ByUserModel.setThumbnailFilePath(fileNames.get(2));
         }
-
-        // 아니면 냅둔다
-
 
 
         // 더티체킹
@@ -186,10 +201,10 @@ public class ShoppingMallService1 {
         // 위 필터로 썸네일은 무조건 존재한다는 조건에
 
         // 주의 반드시 옮기고 난다음에 content를 수정할것
-        int makeFileResult = makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(),content, AuthNames.Seller);
+        Map<Integer,String> makeFileResult = makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(),content, AuthNames.Seller);
         makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
 
-        if(makeFileResult == -1){
+        if(makeFileResult.get(1) == "-3"){
             return -3; // 사진 10을 넘겨버림
         }
 
@@ -198,7 +213,8 @@ public class ShoppingMallService1 {
                 .productPrice(productPrice)
                 .productQuantity(productquantity)
                 .pictureFilePath(productFilePath.toString())
-                .content(makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(),content,request))
+                .content(makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(),content,makeFileResult.get(2),request))
+                .filefolderPath(makeFileResult.get(2))
                 .pictureUrlPath(productUrlPath.toString())
                 .shoppingMall(shoppingMallModel)
                 .build();
@@ -258,6 +274,7 @@ public class ShoppingMallService1 {
         // 파일저장
         // 1. url 사진 경로
         // 2. 컴퓨터 사진 파일 경로
+        // 3. 폴더 경로
         Map<Integer, String> returnPathNams = makeFile.makeFileImage(principalDetails.getUserModel(),thumbnail,request);
 
         // 바꾸기전에 먼저이동, 검사를 통해 안쓰는 파일들을 삭제시킬 예정

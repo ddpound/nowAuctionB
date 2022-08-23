@@ -79,7 +79,7 @@ public class AdminController {
 
         // 세이브 서비스 붙여주기
 
-        adminService1.saveAnnouncementBoardImageFIle(principalDetails.getUserModel().getUserId(),boardData.get("content"));
+        String folderPathName =  adminService1.saveAnnouncementBoardImageFIle(principalDetails.getUserModel().getUserId(),boardData.get("content"));
         adminService1.saveAnnouncementBoard(
                 IntegrateBoardModel.builder()
                         .title(boardData.get("title"))
@@ -87,6 +87,7 @@ public class AdminController {
                         .userModel(principalDetails.getUserModel())
                         .adminBoardCategory(AdminBoardCategory.Announcemnet)
                         .build(),
+                folderPathName,
                 request
         );
 

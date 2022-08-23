@@ -37,6 +37,12 @@ public class ShoppingMallModel {
     @Column(length = 1000)
     private String thumbnailFilePath;
 
+    /**
+     * 이미지파일이 저장된 고유 폴더 경로
+     * */
+    @Column(length = 500)
+    private String filefolderPath;
+
     @CreationTimestamp
     private Timestamp createShoppingMall;
 
