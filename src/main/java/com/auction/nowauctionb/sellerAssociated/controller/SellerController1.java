@@ -119,8 +119,11 @@ public class SellerController1 {
     // 사용하지 않는 이미지파일을 옮기면 더미데이터가 생성되는 꼴
 
 
-    // 제품등록
-    @PostMapping(value = "save-product")
+    /**
+     * 제품등록, 저장과 수정을 전부 담당하는
+     * 엔드포인트 입니다.
+     * */
+    @PostMapping(value = "save-product/{modify}")
     public ResponseEntity saveProduct(@RequestParam("productname") String productname,
                                       @RequestParam("productprice") int productprice,
                                       @RequestParam("productquantity") int productquantity,
@@ -128,7 +131,7 @@ public class SellerController1 {
                                       @RequestParam(value="thumbnail1", required=false) MultipartFile file1,
                                       @RequestParam(value="thumbnail2", required=false) MultipartFile file2,
                                       @RequestParam(value="thumbnail3", required=false) MultipartFile file3,
-                                      Authentication authentication,
+                                      @PathVariable(value = "modify" , required = false) boolean modify,                                      Authentication authentication,
                                       HttpServletRequest request) {
 
 //        System.out.println("productname" + productname);
@@ -150,7 +153,7 @@ public class SellerController1 {
             fileList.add(file3);
 
         int resultNum = shoppingMallService1.saveProduct(authentication,
-                productname,productprice,productquantity,content,fileList,request);
+                productname,productprice,productquantity,content,fileList,request,false);
 
         if(resultNum == 1 ){
             return new ResponseEntity<>("OK", HttpStatus.OK);
@@ -166,6 +169,18 @@ public class SellerController1 {
 
         return new ResponseEntity<>("Server Or Client Request Error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+
+    /**
+     * 판매자가 수정할 때 필요한 해당 제품을 가져오는 endPoint
+     * */
+    @GetMapping(value = "show-shoppingmall/product-show/{id}")
+    public ResponseEntity showProduct(@PathVariable("id")int productlId){
+
+        // 서비스 만들기
+        return new ResponseEntity(shoppingMallService1.findProduct(productlId), HttpStatus.OK);
+    }
+
 
     @PostMapping(value = "save-board")
     public ResponseEntity saveBoard(@RequestParam("title") String title,

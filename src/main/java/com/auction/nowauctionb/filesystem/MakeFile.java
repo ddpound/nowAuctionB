@@ -358,13 +358,9 @@ public class MakeFile {
 
         // 바뀔 경로명
         // C나 home루트명 제외시키기
-//        String changeFolderPath = mainurl
-//                +AllStaticStatus
-//                .saveImageFileRoot
-//                .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang"))
-//                +nowDate()+"/";
-
-        String changeFolderPath = filefolderPath;
+        String changeFolderPath = mainurl
+                +filefolderPath
+                .substring(filefolderPath.indexOf("Jang"));
 
         return content.replace(changeTargetFolderPath,changeFolderPath);
     }

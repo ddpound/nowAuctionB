@@ -16,9 +16,13 @@ import lombok.RequiredArgsConstructor;
 
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -154,6 +158,12 @@ public class ShoppingMallService1 {
 
         return 1;
     }
+
+    /**
+     *  제품 저장 함수
+     * @param modify true일때 수정, false일대는 일반 save
+     *
+     * */
     @Transactional
     public int saveProduct(Authentication authentication,
                            String productName,
@@ -161,7 +171,8 @@ public class ShoppingMallService1 {
                            int productquantity,
                            String content,
                            List<MultipartFile> fileList,
-                           HttpServletRequest request){
+                           HttpServletRequest request,
+                           boolean modify){
 
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
@@ -177,12 +188,9 @@ public class ShoppingMallService1 {
 
         // 받아온 썸네일 길이부터
         if(fileList.size() > 0){
-
             if(fileList.size() > 3 ){
-
                 return -4; // 3개 이상의 썸네일
             }
-
             Map<Integer,String> returnPathName = new HashMap<>();
 
             for (MultipartFile file : fileList
@@ -192,8 +200,6 @@ public class ShoppingMallService1 {
                  productUrlPath.append(returnPathName.get(1)).append(",");
                  productFilePath.append(returnPathName.get(2)).append(",");
             }
-
-
         }else{
             return -5 ; // no thumbnail
         }
@@ -233,6 +239,16 @@ public class ShoppingMallService1 {
         makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
         return 1;
     }
+
+
+    /**
+     * 판매자가 판매자 권한을 인증받고
+     * 제품 수정을위해 받아내는 제품 메소드
+     * */
+    public Optional<ProductModel> findProduct(int id){
+        return productModelRepository.findById(id);
+    }
+
 
     @Transactional(readOnly = true)
     public List<ShoppingMallModel> findAllShoppingMallList(){

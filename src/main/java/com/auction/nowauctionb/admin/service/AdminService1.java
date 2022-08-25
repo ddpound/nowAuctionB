@@ -155,7 +155,12 @@ public class AdminService1 {
     public String saveAnnouncementBoardImageFIle(int userAndBoardId, String content) {
 
         // 파일 관련 부분
-        return makeFile.saveMoveImageFiles(userAndBoardId, content , AuthNames.Admin).get(2);
+        String returnFolderPath = makeFile.saveMoveImageFiles(userAndBoardId, content , AuthNames.Admin).get(2);
+
+
+        makeFile.deleteTemporary(userAndBoardId);
+
+        return returnFolderPath;
 
     }
 
@@ -180,8 +185,7 @@ public class AdminService1 {
         String changeBoardContent = boardModel.getContent().replace(changeTargetFolderPath, changeFolderPath);
         boardModel.setContent(changeBoardContent);
 
-        // 임시파일 제를 진행 후 저장 진행
-        makeFile.deleteTemporary(boardModel.getId());
+
         integrateBoardRepository.save(boardModel);
     }
 
