@@ -16,13 +16,9 @@ import lombok.RequiredArgsConstructor;
 
 
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -162,10 +158,17 @@ public class ShoppingMallService1 {
     /**
      *  제품 저장 함수
      * @param modify true일때 수정, false일대는 일반 save
+     * @param ProductID 수정일 때 보드 아이디도 받아와야함 값이 있는지 체크
+     *
+     * @param productName 제품이름
+     * @param productPrice 제품가격
+     * @param content 제품 내용
+     * @param fileList 썸네일 리스트
      *
      * */
     @Transactional
     public int saveProduct(Authentication authentication,
+                           Integer ProductID,
                            String productName,
                            int productPrice,
                            int productquantity,
@@ -173,6 +176,20 @@ public class ShoppingMallService1 {
                            List<MultipartFile> fileList,
                            HttpServletRequest request,
                            boolean modify){
+
+        // 수정이 참이면서
+        // ID가 널이 아닐때, 수정을 진행
+        if(modify && ProductID != null){
+
+            // 수정이니 이미 제품이 있으니 검사를 시도
+            // 동시에 영속화
+            Optional<ProductModel> productModel = productModelRepository.findById(ProductID);
+
+
+
+
+        }
+
 
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 

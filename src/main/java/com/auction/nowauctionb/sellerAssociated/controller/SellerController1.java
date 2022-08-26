@@ -128,19 +128,14 @@ public class SellerController1 {
                                       @RequestParam("productprice") int productprice,
                                       @RequestParam("productquantity") int productquantity,
                                       @RequestParam("content") String content,
+                                      @RequestParam(value = "ProductID", required = false) Integer ProductID,
                                       @RequestParam(value="thumbnail1", required=false) MultipartFile file1,
                                       @RequestParam(value="thumbnail2", required=false) MultipartFile file2,
                                       @RequestParam(value="thumbnail3", required=false) MultipartFile file3,
                                       @PathVariable(value = "modify" , required = false) boolean modify,                                      Authentication authentication,
                                       HttpServletRequest request) {
 
-//        System.out.println("productname" + productname);
-//        System.out.println("productprice" +productprice);
-//        System.out.println("productquantity"+ productquantity);
-//        System.out.println("content" +content);
-//        System.out.println("thumbnail1" + file1);
-//        System.out.println("thumbnail2" + file2);
-//        System.out.println("thumbnail3" + file3);
+
 
         List<MultipartFile> fileList = new ArrayList<MultipartFile>();
         
@@ -152,8 +147,8 @@ public class SellerController1 {
         if( file3 != null )
             fileList.add(file3);
 
-        int resultNum = shoppingMallService1.saveProduct(authentication,
-                productname,productprice,productquantity,content,fileList,request,false);
+        int resultNum = shoppingMallService1.saveProduct(authentication,ProductID,
+                productname,productprice,productquantity,content,fileList,request,modify);
 
         if(resultNum == 1 ){
             return new ResponseEntity<>("OK", HttpStatus.OK);
