@@ -163,7 +163,7 @@ public class ShoppingMallService1 {
      * @param productName 제품이름
      * @param productPrice 제품가격
      * @param content 제품 내용
-     * @param fileList 썸네일 리스트
+     * @param fileList 썸네일 리스트, 수정일때는 없어도 된다
      *
      * */
     @Transactional
@@ -175,87 +175,114 @@ public class ShoppingMallService1 {
                            String content,
                            List<MultipartFile> fileList,
                            HttpServletRequest request,
-                           boolean modify){
-
-        // 수정이 참이면서
-        // ID가 널이 아닐때, 수정을 진행
-        if(modify && ProductID != null){
-
-            // 수정이니 이미 제품이 있으니 검사를 시도
-            // 동시에 영속화
-            Optional<ProductModel> productModel = productModelRepository.findById(ProductID);
-
-
-
-
-        }
-
+                           boolean modify) {
 
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
-        // 영속화
-        ShoppingMallModel shoppingMallModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
-
         StringBuilder productFilePath = new StringBuilder();
         StringBuilder productUrlPath = new StringBuilder();
+
+        // 주의 반드시 옮기고 난다음에 content를 수정할것
+        Map<Integer, String> makeFileResult = makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(), content, AuthNames.Seller);
+
+        if (makeFileResult.get(1) == "-3") {
+            return -3; // 사진 10을 넘겨버림
+        }
+
+        // 사진을 옮긴후 content 내용의 url경로도 변경
+        String changecontent = makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(), content, makeFileResult.get(2), request);
+
 
         // 파일저장 (make file)
         // 1. url 사진 경로
         // 2. 컴퓨터 사진 파일 경로
 
-        // 받아온 썸네일 길이부터
-        if(fileList.size() > 0){
-            if(fileList.size() > 3 ){
+        // 썸네일을 받아오고 수정이 아닐때
+        if (fileList.size() > 0 && modify) {
+            if (fileList.size() > 3) {
                 return -4; // 3개 이상의 썸네일
             }
-            Map<Integer,String> returnPathName = new HashMap<>();
+
+            Map<Integer, String> returnPathName = new HashMap<>();
+            // 썸네일 저장하기
 
             for (MultipartFile file : fileList
-                 ) {
-                 returnPathName = makeFile.makeFileImage(principalDetails.getUserModel(), file,request);
+            ) {
+                returnPathName = makeFile.makeFileImage(principalDetails.getUserModel(), file, request);
 
-                 productUrlPath.append(returnPathName.get(1)).append(",");
-                 productFilePath.append(returnPathName.get(2)).append(",");
+                productUrlPath.append(returnPathName.get(1)).append(",");
+                productFilePath.append(returnPathName.get(2)).append(",");
             }
-        }else{
-            return -5 ; // no thumbnail
         }
 
-        // 위 필터로 썸네일은 무조건 존재한다는 조건에
-
-        // 주의 반드시 옮기고 난다음에 content를 수정할것
-        Map<Integer,String> makeFileResult = makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(),content, AuthNames.Seller);
-        makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
-
-        if(makeFileResult.get(1) == "-3"){
-            return -3; // 사진 10을 넘겨버림
-        }
-
-        ProductModel productModel = ProductModel.builder()
-                .productName(productName)
-                .productPrice(productPrice)
-                .productQuantity(productquantity)
-                .pictureFilePath(productFilePath.toString())
-                .content(makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(),content,makeFileResult.get(2),request))
-                .filefolderPath(makeFileResult.get(2))
-                .pictureUrlPath(productUrlPath.toString())
-                .shoppingMall(shoppingMallModel)
-                .build();
-
-        try {
-            productModelRepository.save(productModel);
-
-        }catch (Exception e){
-            log.info(e);
-            return -1; // 단순 에러
+        // 수정이 아니고, 리스트가 0일때
+        // 썸네일이 없으니깐 -5를 반환
+        if(fileList.size() ==0 && !modify){
+            return -5;
         }
 
 
-        // 문제 없다면 반환 1, 여기까지왔다면 임시파일 삭제
-        // 임시파일 삭제
-        makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
-        return 1;
-    }
+
+        // 수정이 참이면서
+        // ID가 널이 아닐때, 수정을 진행
+        if (modify && ProductID != null) {
+
+            // 수정이니 이미 제품이 있으니 검사를 시도
+            // 동시에 영속화
+            Optional<ProductModel> productModel = productModelRepository.findById(ProductID);
+
+            // 받아온 썸네일이 있을때
+            if (fileList.size() > 0) {
+
+            }
+
+            productModel.get().setProductName(productName);
+            productModel.get().setProductQuantity(productquantity);
+            productModel.get().setProductPrice(productPrice);
+            productModel.get().setContent(changecontent);
+
+        }
+
+
+
+        // 영속화
+        ShoppingMallModel shoppingMallModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
+
+
+
+
+            // 위 필터로 썸네일은 무조건 존재한다는 조건에
+
+
+            makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
+
+
+            ProductModel productModel = ProductModel.builder()
+                    .productName(productName)
+                    .productPrice(productPrice)
+                    .productQuantity(productquantity)
+                    .pictureFilePath(productFilePath.toString())
+                    .content(changecontent)
+                    .filefolderPath(makeFileResult.get(2))
+                    .pictureUrlPath(productUrlPath.toString())
+                    .shoppingMall(shoppingMallModel)
+                    .build();
+
+            try {
+                productModelRepository.save(productModel);
+
+            } catch (Exception e) {
+                log.info(e);
+                return -1; // 단순 에러
+            }
+
+
+            // 문제 없다면 반환 1, 여기까지왔다면 임시파일 삭제
+            // 임시파일 삭제
+            makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
+            return 1;
+        }
+
 
 
     /**
