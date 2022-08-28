@@ -193,27 +193,9 @@ public class ShoppingMallService1 {
         String changecontent = makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(), content, makeFileResult.get(2), request);
 
 
-        // 파일저장 (make file)
-        // 1. url 사진 경로
-        // 2. 컴퓨터 사진 파일 경로
+        // 수정일땐 썸네일이 있어도 되고 없어도 됨
+        // 하지만 처음 저장 할때는 썸네일이 반드시 필요함
 
-        // 썸네일을 받아오고 수정이 아닐때
-        if (fileList.size() > 0 && modify) {
-            if (fileList.size() > 3) {
-                return -4; // 3개 이상의 썸네일
-            }
-
-            Map<Integer, String> returnPathName = new HashMap<>();
-            // 썸네일 저장하기
-
-            for (MultipartFile file : fileList
-            ) {
-                returnPathName = makeFile.makeFileImage(principalDetails.getUserModel(), file, request);
-
-                productUrlPath.append(returnPathName.get(1)).append(",");
-                productFilePath.append(returnPathName.get(2)).append(",");
-            }
-        }
 
         // 수정이 아니고, 리스트가 0일때
         // 썸네일이 없으니깐 -5를 반환
@@ -223,9 +205,32 @@ public class ShoppingMallService1 {
 
 
 
+        // 파일저장 (make file)
+        // 1. url 사진 경로
+        // 2. 컴퓨터 사진 파일 경로
+
+        // 썸네일이 있을 때
+        if (fileList.size() > 0) {
+            if (fileList.size() > 3) {
+                return -4; // 3개 이상의 썸네일
+            }
+
+            Map<Integer, String> returnPathName = new HashMap<>();
+
+            // 썸네일 저장하기
+            for (MultipartFile file : fileList
+            ) {
+                returnPathName = makeFile.makeFileImage(principalDetails.getUserModel(), file, request);
+
+                productUrlPath.append(returnPathName.get(1)).append(",");
+                productFilePath.append(returnPathName.get(2)).append(",");
+            }
+        }
+
         // 수정이 참이면서
         // ID가 널이 아닐때, 수정을 진행
         if (modify && ProductID != null) {
+
 
             // 수정이니 이미 제품이 있으니 검사를 시도
             // 동시에 영속화
@@ -233,7 +238,8 @@ public class ShoppingMallService1 {
 
             // 받아온 썸네일이 있을때
             if (fileList.size() > 0) {
-
+                productModel.get().setPictureUrlPath(productUrlPath.toString());
+                productModel.get().setPictureFilePath(productFilePath.toString());
             }
 
             productModel.get().setProductName(productName);
@@ -241,6 +247,11 @@ public class ShoppingMallService1 {
             productModel.get().setProductPrice(productPrice);
             productModel.get().setContent(changecontent);
 
+            // 수정 진행하고 끝내버리자
+            // 문제 없다면 반환 1, 여기까지왔다면 임시파일 삭제
+            // 임시파일 삭제
+            makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
+            return 1;
         }
 
 
@@ -250,38 +261,34 @@ public class ShoppingMallService1 {
 
 
 
-
-            // 위 필터로 썸네일은 무조건 존재한다는 조건에
-
-
-            makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
+        makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
 
 
-            ProductModel productModel = ProductModel.builder()
-                    .productName(productName)
-                    .productPrice(productPrice)
-                    .productQuantity(productquantity)
-                    .pictureFilePath(productFilePath.toString())
-                    .content(changecontent)
-                    .filefolderPath(makeFileResult.get(2))
-                    .pictureUrlPath(productUrlPath.toString())
-                    .shoppingMall(shoppingMallModel)
-                    .build();
+        ProductModel productModel = ProductModel.builder()
+                .productName(productName)
+                .productPrice(productPrice)
+                .productQuantity(productquantity)
+                .pictureFilePath(productFilePath.toString())
+                .content(changecontent)
+                .filefolderPath(makeFileResult.get(2))
+                .pictureUrlPath(productUrlPath.toString())
+                .shoppingMall(shoppingMallModel)
+                .build();
 
-            try {
-                productModelRepository.save(productModel);
+        try {
+            productModelRepository.save(productModel);
 
-            } catch (Exception e) {
-                log.info(e);
-                return -1; // 단순 에러
-            }
-
-
-            // 문제 없다면 반환 1, 여기까지왔다면 임시파일 삭제
-            // 임시파일 삭제
-            makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
-            return 1;
+        } catch (Exception e) {
+            log.info(e);
+            return -1; // 단순 에러
         }
+
+
+        // 문제 없다면 반환 1, 여기까지왔다면 임시파일 삭제
+        // 임시파일 삭제
+        makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
+        return 1;
+    }
 
 
 
