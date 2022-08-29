@@ -183,14 +183,14 @@ public class ShoppingMallService1 {
         StringBuilder productUrlPath = new StringBuilder();
 
         // 주의 반드시 옮기고 난다음에 content를 수정할것
-        Map<Integer, String> makeFileResult = makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(), content, AuthNames.Seller);
-
-        if (makeFileResult.get(1) == "-3") {
-            return -3; // 사진 10을 넘겨버림
+        Map<Integer, String> makeFileResult = null;
+        if(!modify){
+            makeFileResult = makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(), content, AuthNames.Seller,"");
         }
 
+
         // 사진을 옮긴후 content 내용의 url경로도 변경
-        String changecontent = makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(), content, makeFileResult.get(2), request);
+        String changecontent = "";
 
 
         // 수정일땐 썸네일이 있어도 되고 없어도 됨
@@ -232,12 +232,34 @@ public class ShoppingMallService1 {
         if (modify && ProductID != null) {
 
 
+
             // 수정이니 이미 제품이 있으니 검사를 시도
             // 동시에 영속화
             Optional<ProductModel> productModel = productModelRepository.findById(ProductID);
 
+            makeFileResult = makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(), content, AuthNames.Seller,productModel.get().getFilefolderPath());
+
+            if (makeFileResult.get(1) == "-3") {
+                return -3; // 사진 10을 넘겨버림
+            }
+
+            // 사진을 옮긴후 content 내용의 url경로도 변경
+            changecontent = makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(), content, makeFileResult.get(2), request);
+
             // 받아온 썸네일이 있을때
             if (fileList.size() > 0) {
+
+                // 전에 받은 애들은 삭제해야하니 삭제과정을 거치도록하겠습니다.
+                String filepathString = productModel.get().getPictureFilePath();
+                List<String> deleteProductFile = List.of(filepathString.substring(0, filepathString.length()-1).split(","));
+
+                for (String i:deleteProductFile
+                     ) {
+
+                    // i는 각각의 경로 그 경로를 받아와 삭제
+                    makeFile.filePathImageDelete(i);
+                }
+
                 productModel.get().setPictureUrlPath(productUrlPath.toString());
                 productModel.get().setPictureFilePath(productFilePath.toString());
             }
@@ -249,6 +271,10 @@ public class ShoppingMallService1 {
 
             // 수정 진행하고 끝내버리자
             // 문제 없다면 반환 1, 여기까지왔다면 임시파일 삭제
+
+
+            //수정 진행후 사용하지 않는 이미지 삭제
+            makeFile.modifyImageFile(productModel.get().getFilefolderPath(),changecontent);
             // 임시파일 삭제
             makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
             return 1;
@@ -259,6 +285,12 @@ public class ShoppingMallService1 {
         // 영속화
         ShoppingMallModel shoppingMallModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
 
+        if (makeFileResult.get(1) == "-3") {
+            return -3; // 사진 10을 넘겨버림
+        }
+
+        // 사진을 옮긴후 content 내용의 url경로도 변경
+        changecontent = makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(), content, makeFileResult.get(2), request);
 
 
         makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
@@ -320,7 +352,7 @@ public class ShoppingMallService1 {
     public void saveProductImageFIle(int userproductdId,String content){
 
         // 파일 관련 부분
-        makeFile.saveMoveImageFiles(userproductdId, content, AuthNames.Seller);
+        makeFile.saveMoveImageFiles(userproductdId, content, AuthNames.Seller,"");
         makeFile.deleteTemporary(userproductdId);
 
     }
@@ -345,7 +377,7 @@ public class ShoppingMallService1 {
         Map<Integer, String> returnPathNams = makeFile.makeFileImage(principalDetails.getUserModel(),thumbnail,request);
 
         // 바꾸기전에 먼저이동, 검사를 통해 안쓰는 파일들을 삭제시킬 예정
-        makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(),content,AuthNames.Seller);
+        makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(),content,AuthNames.Seller,"");
 
         // ----------------- 받은 content 를 바꿔주기 경로 ------------------------------//
         // 배포때는 수정해야할 듯

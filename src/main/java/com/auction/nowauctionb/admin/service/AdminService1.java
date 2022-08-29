@@ -155,7 +155,7 @@ public class AdminService1 {
     public String saveAnnouncementBoardImageFIle(int userAndBoardId, String content) {
 
         // 파일 관련 부분
-        String returnFolderPath = makeFile.saveMoveImageFiles(userAndBoardId, content , AuthNames.Admin).get(2);
+        String returnFolderPath = makeFile.saveMoveImageFiles(userAndBoardId, content , AuthNames.Admin,"").get(2);
 
 
         makeFile.deleteTemporary(userAndBoardId);

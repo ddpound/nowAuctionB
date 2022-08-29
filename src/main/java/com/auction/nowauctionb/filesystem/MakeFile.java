@@ -171,8 +171,13 @@ public class MakeFile {
      * 1 반환값은 결과값 반환
      * 1일때는 올바르고 -3 일때는 옮기는 사진이 10장 이상일 때
      * 2는 등록할 폴더를 뜻함
+     * 임시파일에 있는 사진들을 검사하고 옮기는 함수
+     * @param folderpath 이값이 있다면 수정이라는 뜻
      * */
-    public Map<Integer,String> saveMoveImageFiles(int fileId, String content, AuthNames auth){
+    public Map<Integer,String> saveMoveImageFiles(int fileId,
+                                                  String content,
+                                                  AuthNames auth,
+                                                  String folderpath){
 
         Map <Integer,String> result = new HashMap<>();
 
@@ -182,11 +187,22 @@ public class MakeFile {
         String saveFolderRoot = AllStaticStatus.saveImageFileRoot+nowDate()+"/";
 
         // 해당 게시판이든 관련된 폴더 명을 랜덤으로 가져와주자
-        String saveFolderName = String.valueOf(UUID.randomUUID())+"/";
+        String saveFolderName = "";
 
-        // 즉 c//jang_save/2022-08/33/블라블라폴더/
-        result.put(2, saveFolderRoot+saveFolderName);
+        // 만약 비어있다면 처음 지정해주는 거니깐
+        if(folderpath.equals("")){
+            saveFolderName = String.valueOf(UUID.randomUUID())+"/";
+            // 즉 c//jang_save/2022-08/33/블라블라폴더/
+            result.put(2, saveFolderRoot+saveFolderName);
+        }else {
+            saveFolderName = folderpath;
+            result.put(2, saveFolderName);
+        }
 
+
+
+
+        // 임시파일에 있는 곳에 접근해서 옮겨야함
         File dir = new File(temporary);
         File[] files = dir.listFiles();
 
@@ -211,9 +227,14 @@ public class MakeFile {
                         if(content.contains(f.getName())){
                             // 이름 변경 -> 파일 이동 -> 오리지널 파일로 이동 url 는 그럼?
                             // DB 이름도 변경해야함 Content 검사해서 변경해서 넣어주기
-                            String changeFileName = saveFolderRoot + saveFolderName + f.getName();
 
-                            // 저장할 파일의 경로 (걍로와 이름)
+                            String changeFileName = saveFolderRoot + saveFolderName + f.getName();
+                            // 수정이라면
+                            if(!folderpath.equals("")){
+                                changeFileName = folderpath+f.getName();
+                            }
+
+                            // 저장할 파일의 경로 (경로와 이름)
                             File targetFile = new File(changeFileName);
                             try {
                                 FileInputStream fileInputStream = new FileInputStream(f); // 저장할 파일
@@ -240,6 +261,38 @@ public class MakeFile {
 
 
         return result; //문제 없다면 1
+    }
+
+    /**
+     * 수정일 때 사진을 검사할때 사용한다.
+     * 지정 폴더와 content를 준다면 사진 이름을 받아와
+     * content 문자열에 검사 결과, 안나오면 해당 이미지 파일 삭제
+     * 아니면 냅둔다
+     * @param saveFolderpath 사진들을 저장해놓는 경로를 받아준다
+     * @param content 글 작성된 내용에서 해당 사진을 사용하지 않으면 삭제하기 위해둔다
+     * */
+    public void modifyImageFile(String saveFolderpath, String content){
+
+        File folder = new File(saveFolderpath);
+
+        try {
+            File[] folder_list = folder.listFiles(); //파일리스트 얻어오기
+
+            if (folder_list != null) {
+                for (File file : folder_list) {
+                    // 즉 작성 내용 안에 사진을 사용중이라면 삭제하지않고
+                    // 사용중이 아니라면 삭제한다.
+                    if(!content.contains(file.getName())){
+                        file.delete(); //파일 삭제
+                    }
+                }
+            } else {
+                log.info("imageFolder and file is null");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     /**
@@ -286,19 +339,31 @@ public class MakeFile {
      * */
     public void filePathImageDelete(String filePath){
 
-        File file = new File(filePath);
+        // 상위 폴더도 잘라야하는데
+        // C:\Jang_SaveImage/2022-08/29/789b7e28-99bf-4d8b-87eb-0e5fcf2206d3/2-8fd43942-c9e1-4dc0-a94c-ddb6636861b2.jpg
+        // 대충 이런 값들이 들어온다했을 때
+        // 0,1,2,3 인덱스까지만 붙여주면 볼더가 된다
+        String[] folderPath = filePath.split("/");
+        File folder = new File(folderPath[0]+"/"+folderPath[1]+"/"+folderPath[2]+"/"+folderPath[3]);
 
-        // exists 존재하다.
-        if( file.exists() ){
-            if(file.delete()){
-                log.info("delete file");
-            }else{
-                log.info("delete fail");
+        try {
+            while(folder.exists()) {
+                File[] folder_list = folder.listFiles(); //파일리스트 얻어오기
+                if(folder_list != null){
+                    for (int j = 0; j < folder_list.length; j++) {
+                        folder_list[j].delete(); //파일 삭제
+                    }
+
+                    if(folder_list.length == 0 && folder.isDirectory()){
+                        folder.delete(); //대상폴더 삭제
+                    }
+                }else{
+                    log.info("imageFolder and file is null");
+                }
+
             }
-
-
-        }else{
-            log.info("This file does not exist");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
