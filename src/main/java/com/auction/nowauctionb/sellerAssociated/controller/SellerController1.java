@@ -166,14 +166,40 @@ public class SellerController1 {
     }
 
 
+
+
     /**
      * 판매자가 수정할 때 필요한 해당 제품을 가져오는 endPoint
      * */
     @GetMapping(value = "show-shoppingmall/product-show/{id}")
-    public ResponseEntity showProduct(@PathVariable("id")int productlId){
+    public ResponseEntity showProduct(@PathVariable("id")int productlId,
+                                      HttpServletRequest request){
 
         // 서비스 만들기
         return new ResponseEntity(shoppingMallService1.findProduct(productlId), HttpStatus.OK);
+    }
+
+    /*
+    * 제품을 삭제하는 엔드포인트
+    * 제품을 삭제할때 해당 유저가 삭제해야하니
+    * 검증과정도 있어야함,
+    * 같은 판매자가 악의적으로 다른사람의 제품을 삭제하면 안됨
+    * */
+    @DeleteMapping(value = "delete-product/{id}")
+    public ResponseEntity deleteProduct(@PathVariable("id")int productId,
+                                        Authentication authentication){
+
+        int resultNum = shoppingMallService1.deleteProduct(productId,authentication);
+
+        if(resultNum ==1 ){
+            return new ResponseEntity("success delete", HttpStatus.OK);
+
+        }
+        if(resultNum == -2 ){
+            return new ResponseEntity("fail delete", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity("fail delete", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 

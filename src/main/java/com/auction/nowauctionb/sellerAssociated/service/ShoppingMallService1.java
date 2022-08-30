@@ -4,6 +4,7 @@ import com.auction.nowauctionb.admin.model.AuthNames;
 import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
+import com.auction.nowauctionb.loginjoin.model.UserModel;
 import com.auction.nowauctionb.sellerAssociated.model.BoardCategory;
 import com.auction.nowauctionb.sellerAssociated.model.CommonModel;
 import com.auction.nowauctionb.sellerAssociated.model.ProductModel;
@@ -319,6 +320,52 @@ public class ShoppingMallService1 {
         // 문제 없다면 반환 1, 여기까지왔다면 임시파일 삭제
         // 임시파일 삭제
         makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
+        return 1;
+    }
+
+    /*
+    * 어드민이 접근시 삭제 가능
+    * */
+    @Transactional
+    public int deleteProduct(int productId,Authentication authentication){
+
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+
+        UserModel userModel = principalDetails.getUserModel();
+
+
+        // 수정이니 이미 제품이 있으니 검사를 시도
+        // 동시에 영속화
+        Optional<ProductModel> productModel = productModelRepository.findById(productId);
+
+        // 삭제하려는 유저와 제품의 유저가 달라 -2를 반환
+        // 리스트의 길이가 3이 아닐때 즉 어드민이 아니면서 해당 사용자의 제품이 아니라면
+        if(productModel.get().getShoppingMall().getUserModel().getUserId() != userModel.getUserId()
+        && userModel.getRoleList().size()!=3){
+            return -2;
+        }
+
+        // 썸네일이 있을 때
+        if(productModel.get().getPictureFilePath().length() >0){
+            // 썸네일 파일 삭제
+            String filepathString = productModel.get().getPictureFilePath();
+            List<String> deleteProductFile = List.of(filepathString.substring(0, filepathString.length()-1).split(","));
+
+            for (String i:deleteProductFile
+            ) {
+                // i는 각각의 경로 그 경로를 받아와 삭제
+                makeFile.filePathImageDelete(i);
+            }
+
+        }
+
+        // 사진을 담아놓는 폴더 경로를 통해 파일 삭제
+        if(productModel.get().getFilefolderPath().length() >0){
+            makeFile.folderPathImageDelete(productModel.get().getFilefolderPath());
+        }
+
+        //마지막 단계에 삭제
+        productModelRepository.delete(productModel.get());
         return 1;
     }
 
