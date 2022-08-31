@@ -203,16 +203,18 @@ public class SellerController1 {
     }
 
 
-    @PostMapping(value = "save-board")
+    @PostMapping(value = "save-board/{modify}")
     public ResponseEntity saveBoard(@RequestParam("title") String title,
                                     @RequestParam("content") String content,
                                     @RequestParam(value="thumbnail", required=false) MultipartFile thumbnail,
                                     @RequestParam(value = "category", required = false) int categoryId,
+                                    @RequestParam(value = "boardId" ,required = false) Integer boardId,
+                                    @PathVariable(value = "modify" , required = false) boolean modify,
                                     Authentication authentication,
                                     HttpServletRequest request) {
 
         int resultNum = shoppingMallService1.saveBoard(authentication,
-                title,content,thumbnail,categoryId,request);
+                title,content,thumbnail,categoryId,request,modify,boardId);
 
         if(resultNum == 1 ){
             return new ResponseEntity<>("OK", HttpStatus.OK);

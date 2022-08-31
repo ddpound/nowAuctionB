@@ -1,7 +1,6 @@
 package com.auction.nowauctionb.sellerAssociated.service;
 
 import com.auction.nowauctionb.admin.model.AuthNames;
-import com.auction.nowauctionb.allstatic.AllStaticStatus;
 import com.auction.nowauctionb.configpack.auth.PrincipalDetails;
 import com.auction.nowauctionb.filesystem.MakeFile;
 import com.auction.nowauctionb.loginjoin.model.UserModel;
@@ -185,10 +184,10 @@ public class ShoppingMallService1 {
 
         // 주의 반드시 옮기고 난다음에 content를 수정할것
         Map<Integer, String> makeFileResult = null;
+
         if(!modify){
             makeFileResult = makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(), content, AuthNames.Seller,"");
         }
-
 
         // 사진을 옮긴후 content 내용의 url경로도 변경
         String changecontent = "";
@@ -231,8 +230,6 @@ public class ShoppingMallService1 {
         // 수정이 참이면서
         // ID가 널이 아닐때, 수정을 진행
         if (modify && ProductID != null) {
-
-
 
             // 수정이니 이미 제품이 있으니 검사를 시도
             // 동시에 영속화
@@ -405,55 +402,100 @@ public class ShoppingMallService1 {
     }
 
     // 카테고리를 만들었을때 이름이 똑같으면, 알아서 만들어지도록할지..아니면...음..
+    /**
+     * 판매자의 글을 작성할 수 있다, 수정도 같이 생각해서 넣어야 할 꺼같다.
+     *
+     * @param modify 참일때 수정, 거짓이면 처음 저장함
+     *
+     * */
     @Transactional
     public int saveBoard(Authentication authentication,
                          String title,
                          String content,
                          MultipartFile thumbnail,
                          int categoryId,
-                         HttpServletRequest request){
+                         HttpServletRequest request,
+                         boolean modify,
+                         Integer boardId){
 
-        PrincipalDetails principalDetails =(PrincipalDetails) authentication.getPrincipal();
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
+
+        // 어디 쇼핑몰의 글을 저장할지 찾아냄
+        ShoppingMallModel shoppingMallModel = shoppingMallModelRepositry.findByUserModel(principalDetails.getUserModel());
+
+        // 카테고리를 받아와 찾아냄, 보드 카테고리는 반드시 있어야함
         Optional<BoardCategory> findBoardCategory = boardCategoryRepository.findById(categoryId);
 
-        // 파일저장
-        // 1. url 사진 경로
-        // 2. 컴퓨터 사진 파일 경로
-        // 3. 폴더 경로
-        Map<Integer, String> returnPathNams = makeFile.makeFileImage(principalDetails.getUserModel(),thumbnail,request);
 
-        // 바꾸기전에 먼저이동, 검사를 통해 안쓰는 파일들을 삭제시킬 예정
-        makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(),content,AuthNames.Seller,"");
+        // 썸네일 사진
+        Map<Integer, String> returnPathNams = null;
 
-        // ----------------- 받은 content 를 바꿔주기 경로 ------------------------------//
-        // 배포때는 수정해야할 듯
-        String mainurl = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+"/";
+        // 주의 반드시 옮기고 난다음에 content를 수정할것
+        Map<Integer, String> makeFileResult = null;
 
-        // http://localhost:5000/Temporrary_files/1/ 까지의 파일경로를 변경해주자
-        String changeTargetFolderPath
-                = mainurl+ AllStaticStatus.temporaryImageFiles.substring(
-                AllStaticStatus.temporaryImageFiles
-                        .indexOf("Temporary"))
-                + principalDetails.getUserModel().getUserId()+"/";
+        // 수정이 아니라면
+        if(!modify){
 
-        // 앞의 C나 home 루트를 제외시킴
-        String changeFolerPath = mainurl+AllStaticStatus.saveImageFileRoot
-                .substring(AllStaticStatus.saveImageFileRoot.indexOf("Jang"))+makeFile.nowDate()+"/";
+            //썸네일
+            returnPathNams = makeFile.makeFileImage(principalDetails.getUserModel(),thumbnail,request);
 
-        // 바꿔줘야함 문자열 받은걸
-        String changeBoardContent = content.replace(changeTargetFolderPath,changeFolerPath);
-        // ----------------- 받은 content 를 바꿔주기 경로 ------------------------------//
+            // 바꾸기전에 먼저이동, 검사를 통해 안쓰는 파일들을 삭제시킬 예정
+            makeFileResult = makeFile.saveMoveImageFiles(principalDetails.getUserModel().getUserId(),content,AuthNames.Seller,"");
+        }
 
+        // 사진을 옮긴후 content 내용의 url경로도 변경
+        String changecontent = "";
+
+
+        // 수정작업 들어감
+        if(boardId != null && modify){
+
+            // 영속화
+            Optional<CommonModel> commonModel = commonModelRepository.findById(boardId);
+
+            //수정인데 썸네일이 있다면
+            if(thumbnail != null){
+                returnPathNams = makeFile.makeFileImage(principalDetails.getUserModel(),thumbnail,request);
+
+                commonModel.get().setPictureUrlPath(returnPathNams.get(1));
+                commonModel.get().setPictureFilePath(returnPathNams.get(2));
+            }
+
+
+            makeFileResult = makeFile
+                    .saveMoveImageFiles(principalDetails.getUserModel().getUserId(),
+                            content,
+                            AuthNames.Seller,
+                            commonModel.get().getFilefolderPath());
+
+            changecontent = makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(),
+                    content,makeFileResult.get(2),request);
+
+            commonModel.get().setContent(changecontent);
+            commonModel.get().setTitle(title);
+            commonModel.get().setBoardCategory(findBoardCategory.get());
+
+            //수정 진행후 사용하지 않는 이미지 삭제
+            makeFile.modifyImageFile(commonModel.get().getFilefolderPath(),changecontent);
+            // 임시파일 삭제
+            makeFile.deleteTemporary(principalDetails.getUserModel().getUserId());
+            return 1;
+        }
+
+
+        changecontent = makeFile.changeContentImageUrlPath(principalDetails.getUserModel().getUserId(),
+                content,makeFileResult.get(2),request);
 
 
         commonModelRepository.save(CommonModel.builder()
                 .boardCategory(findBoardCategory.get())
-                .userModel(principalDetails.getUserModel())
+                .shoppingMall(shoppingMallModel)
                 .pictureUrlPath(returnPathNams.get(1))
                 .pictureFilePath(returnPathNams.get(2))
+                .filefolderPath(makeFileResult.get(2))
                 .title(title)
-                .Content(changeBoardContent)
+                .Content(changecontent)
                 .build());
 
 

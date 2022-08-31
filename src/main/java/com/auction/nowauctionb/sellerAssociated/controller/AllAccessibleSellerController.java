@@ -64,9 +64,28 @@ public class AllAccessibleSellerController {
     }
 
     @GetMapping(value = "show-shoppingmall/product-show/{id}")
-    public ResponseEntity showProduct(@PathVariable("id")int productlId){
+    public ResponseEntity showProduct(@PathVariable("id")int productId){
 
-        return new ResponseEntity(shoppingMallServiceAll.findProductModel(productlId),HttpStatus.OK);
+        return new ResponseEntity(shoppingMallServiceAll.findProductModel(productId),HttpStatus.OK);
+    }
+
+    /**
+     * 판매자가 작성한 글의 리스트를 가져오는 엔드포인트
+     * 해당 유저의 ID가 필요함
+     * */
+    @GetMapping(value = "find-all-seller-board/{shoppingMallId}")
+    public ResponseEntity showSellerBoardList(@PathVariable("shoppingMallId")int shoppingMallId){
+
+        return new ResponseEntity(shoppingMallServiceAll.findAllCommonModel(shoppingMallId),HttpStatus.OK);
+    }
+
+    /**
+     * 판매자가 작성한 글을 가져오는 엔드포인트
+     * */
+    @GetMapping(value = "show-seller-board/{id}")
+    public ResponseEntity showSellerBoard(@PathVariable("id")int boardId){
+
+        return new ResponseEntity(shoppingMallServiceAll.findCommonModel(boardId),HttpStatus.OK);
     }
 
 }

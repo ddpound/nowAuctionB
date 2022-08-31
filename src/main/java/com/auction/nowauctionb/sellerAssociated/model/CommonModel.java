@@ -26,9 +26,10 @@ public class CommonModel {
 
     private String title;
 
+    // 쇼핑몰
     @ManyToOne
-    @JoinColumn
-    private UserModel userModel;
+    @JoinColumn(name = "shopping_mall")
+    private ShoppingMallModel shoppingMall;
 
     @Lob
     private String Content;

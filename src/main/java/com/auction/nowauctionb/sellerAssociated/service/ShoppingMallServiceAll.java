@@ -2,8 +2,10 @@ package com.auction.nowauctionb.sellerAssociated.service;
 
 
 import com.auction.nowauctionb.filesystem.MakeFile;
+import com.auction.nowauctionb.sellerAssociated.model.CommonModel;
 import com.auction.nowauctionb.sellerAssociated.model.ProductModel;
 import com.auction.nowauctionb.sellerAssociated.model.ShoppingMallModel;
+import com.auction.nowauctionb.sellerAssociated.repository.CommonModelRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ProductModelRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepositry;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,8 @@ public class ShoppingMallServiceAll {
     private final ShoppingMallModelRepositry shoppingMallModelRepositry;
 
     private final MakeFile makeFile;
+
+    private final CommonModelRepository commonModelRepository;
 
     private final ProductModelRepository productModelRepository;
 
@@ -57,6 +61,35 @@ public class ShoppingMallServiceAll {
 
         productModel.get().getShoppingMall().getUserModel().setPassword("");
         return productModel.get();
+    }
+
+    /**
+     * 판매자가 작성한 글의 리스트를 가져와주는 함수
+     * */
+    @Transactional(readOnly = true)
+    public List<CommonModel> findAllCommonModel(int shoppingMallId){
+
+        Optional<ShoppingMallModel>shoppingMallModel = shoppingMallModelRepositry.findById(shoppingMallId);
+
+        List<CommonModel> commonModelList =  commonModelRepository.findAllByShoppingMall(shoppingMallModel.get());
+
+        for (CommonModel c: commonModelList
+             ) {
+            c.getShoppingMall().getUserModel().setPassword("");
+        }
+
+        return commonModelList;
+    }
+
+    /**
+     * 판매자가 작성한 글을 가져와주는 함수
+     * */
+    @Transactional(readOnly = true)
+    public CommonModel findCommonModel(int boardId){
+        Optional<CommonModel> commonModel =  commonModelRepository.findById(boardId);
+
+        commonModel.get().getShoppingMall().getUserModel().setPassword("");
+        return commonModel.get();
     }
 
 
