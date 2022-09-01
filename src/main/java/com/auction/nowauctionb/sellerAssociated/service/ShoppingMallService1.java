@@ -504,6 +504,44 @@ public class ShoppingMallService1 {
         return 1;
     }
 
+    @Transactional
+    public int deleteSellerBoard(int boardId,Authentication authentication){
+
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+
+        UserModel userModel = principalDetails.getUserModel();
+
+
+        // 수정이니 이미 제품이 있으니 검사를 시도
+        // 동시에 영속화
+        Optional<CommonModel> commonModel = commonModelRepository.findById(boardId);
+
+        // 삭제하려는 유저와 제품의 유저가 달라 -2를 반환
+        // 리스트의 길이가 3이 아닐때 즉 어드민이 아니면서 해당 사용자의 제품이 아니라면
+        if(commonModel.get().getShoppingMall().getUserModel().getUserId() != userModel.getUserId()
+                && userModel.getRoleList().size()!=3){
+            return -2;
+        }
+
+        // 썸네일이 있을 때
+        if(commonModel.get().getPictureFilePath().length() >0){
+            // 썸네일 파일 삭제
+            String filepathString = commonModel.get().getPictureFilePath();
+
+            makeFile.filePathImageDelete(filepathString);
+
+        }
+
+        // 사진을 담아놓는 폴더 경로를 통해 파일 삭제
+        if(commonModel.get().getFilefolderPath().length() >0){
+            makeFile.folderPathImageDelete(commonModel.get().getFilefolderPath());
+        }
+
+        //마지막 단계에 삭제
+        commonModelRepository.delete(commonModel.get());
+        return 1;
+    }
+
     @Transactional(readOnly = true)
     public List<BoardCategory> getBoardCategoryList(Authentication authentication){
 

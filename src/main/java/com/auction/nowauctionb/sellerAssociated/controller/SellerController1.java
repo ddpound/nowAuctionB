@@ -231,6 +231,23 @@ public class SellerController1 {
         return new ResponseEntity<>("Server Or Client Request Error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    @DeleteMapping(value = "delete-seller-board/{id}")
+    public ResponseEntity deleteSellerBoard(@PathVariable("id")int boardId,
+                                        Authentication authentication){
+
+        int resultNum = shoppingMallService1.deleteSellerBoard(boardId,authentication);
+
+        if(resultNum ==1 ){
+            return new ResponseEntity("success delete", HttpStatus.OK);
+
+        }
+        if(resultNum == -2 ){
+            return new ResponseEntity("fail delete", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity("fail delete", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     // 현재 해당 유저의 아이디를 받거나 해서
     // 뒤로 가기 동작 감지시 바로 삭제해주는 엔드포인트
     @GetMapping(value = "delete-temporary-iamge")
