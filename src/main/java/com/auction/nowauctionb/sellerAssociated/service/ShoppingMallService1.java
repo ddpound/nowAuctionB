@@ -12,6 +12,7 @@ import com.auction.nowauctionb.sellerAssociated.repository.BoardCategoryReposito
 import com.auction.nowauctionb.sellerAssociated.repository.CommonModelRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ProductModelRepository;
 import com.auction.nowauctionb.sellerAssociated.repository.ShoppingMallModelRepositry;
+import com.sun.tools.jconsole.JConsoleContext;
 import lombok.RequiredArgsConstructor;
 
 
@@ -22,10 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 
 @Log4j2
@@ -404,7 +402,7 @@ public class ShoppingMallService1 {
     // 카테고리를 만들었을때 이름이 똑같으면, 알아서 만들어지도록할지..아니면...음..
     /**
      * 판매자의 글을 작성할 수 있다, 수정도 같이 생각해서 넣어야 할 꺼같다.
-     *
+     * 수정일 때는 카테고리와 썸네일이 비어서 도착할 수도있음
      * @param modify 참일때 수정, 거짓이면 처음 저장함
      *
      * */
@@ -474,7 +472,11 @@ public class ShoppingMallService1 {
 
             commonModel.get().setContent(changecontent);
             commonModel.get().setTitle(title);
-            commonModel.get().setBoardCategory(findBoardCategory.get());
+
+            // 즉 수정된 카테고리가 없을때는 전에 있던 카테고리를 받아와 다시 재설정해주자
+            commonModel.get().setBoardCategory(findBoardCategory.orElse(commonModel.get().getBoardCategory()));
+
+
 
             //수정 진행후 사용하지 않는 이미지 삭제
             makeFile.modifyImageFile(commonModel.get().getFilefolderPath(),changecontent);
