@@ -52,6 +52,7 @@ public class UserService1 {
             }
 
             return UserModelFront.builder()
+                    .id(finduserModel.getUserId())
                     .userName(finduserModel.getUsername())
                     .role(resultRole.replace("ROLE_",""))
                     .nickName(finduserModel.getNickname())

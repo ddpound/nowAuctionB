@@ -12,6 +12,8 @@ import lombok.*;
 @Builder
 public class UserModelFront {
 
+    private int id;
+
     // 이메일
     private String userName;
 
